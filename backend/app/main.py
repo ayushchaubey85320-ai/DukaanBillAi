@@ -181,14 +181,25 @@ def run_tests_endpoint():
 @app.get("/api/download-apk")
 def download_apk_endpoint():
     """Serves the compiled native Android APK for direct phone installation."""
-    apk_path = os.path.join(
-        os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
-        "frontend", "android", "app", "build", "outputs", "apk", "debug", "app-debug.apk"
-    )
-    if not os.path.exists(apk_path):
-        raise HTTPException(status_code=404, detail="APK build is still compiling or not found")
-    return FileResponse(
-        apk_path,
-        media_type="application/vnd.android.package-archive",
-        filename="DukaanAI.apk"
-    )
+    root_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    apk_candidates = [
+        os.path.join(root_dir, "apk", "DukaanAI.apk"),
+        os.path.join(root_dir, "frontend", "android", "app", "build", "outputs", "apk", "debug", "app-debug.apk")
+    ]
+    for apk_path in apk_candidates:
+        if os.path.exists(apk_path):
+            return FileResponse(
+                apk_path,
+                media_type="application/vnd.android.package-archive",
+                filename="DukaanAI.apk"
+            )
+    raise HTTPException(status_code=404, detail="APK build is still compiling or not found")
+
+# Mount frontend/dist static files if available (Single full-stack service on Render)
+frontend_dist_dir = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
+    "frontend", "dist"
+)
+if os.path.exists(frontend_dist_dir):
+    from fastapi.staticfiles import StaticFiles
+    app.mount("/", StaticFiles(directory=frontend_dist_dir, html=True), name="static")

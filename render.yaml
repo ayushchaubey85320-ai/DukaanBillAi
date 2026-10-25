@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: dukaanbillai
+    runtime: python
+    plan: free
+    region: singapore
+    buildCommand: "npm --prefix frontend install && npm --prefix frontend run build && pip install -r backend/requirements.txt"
+    startCommand: "python backend/run.py"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: PORT
+        value: 10000
