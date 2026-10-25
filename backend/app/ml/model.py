@@ -3,6 +3,7 @@ Offline Machine Learning Intent Classification Inference Engine
 Loads the trained Calibrated Scikit-Learn Pipeline and provides real-time intent prediction.
 """
 import os
+import re
 import joblib
 from typing import Dict, Any, Optional
 from backend.app.ml.tokenizer import clean_and_normalize_text
@@ -34,6 +35,12 @@ def predict_intent(text: str) -> Dict[str, Any]:
     lower_t = cleaned.lower()
 
     # Priority 1: High-Precision Business Rule Guards
+    # Customer Identification / Name / Phone / Correction
+    if any(w in lower_t for w in ["customer", "grahak", "client", "buyer"]) or \
+       re.search(r'\b[A-Za-z\u0900-\u097F]+\s+(?:nhi|nahi|not|mat)\s+[A-Za-z\u0900-\u097F]+', lower_t) or \
+       re.search(r'\b(?:nahi|nhi|not|mat)\s+[A-Za-z\u0900-\u097F]+[,\s]+[A-Za-z\u0900-\u097F]+', lower_t):
+        return {"intent": "set_customer", "confidence": 0.99, "clean_text": cleaned}
+
     # Remove GST / 0% Tax (e.g. "gst htao", "gst hatao", "remove gst")
     if any(w in lower_t for w in [
         "gst htao", "gst hatao", "gst hata do", "gst nikal do", "gst mat lagao", 
@@ -70,6 +77,11 @@ def predict_intent(text: str) -> Dict[str, Any]:
                 # Calibrate: 27 classes has baseline ~0.037. Scale raw probability to confidence range
                 calibrated = min(0.98, max(0.60, round(raw_prob * 2.2, 4)))
                 confidence = calibrated
+
+            # Guard: If model misclassified customer statement as set_shop_name
+            if predicted_intent == "set_shop_name" and any(w in lower_t for w in ["customer", "grahak", "client"]):
+                predicted_intent = "set_customer"
+                confidence = 0.99
 
             return {
                 "intent": predicted_intent,

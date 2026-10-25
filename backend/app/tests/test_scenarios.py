@@ -271,6 +271,81 @@ class TestBillingAgentScenarios(unittest.TestCase):
         self.assertEqual(res_rm["bill"]["grand_total"], 80.0)
         self.assertIn("0%", res_rm["reply"])
 
+    def test_scenario_23_live_chat_conversation(self):
+        """Scenario 23: Replay user's exact live chat transcript and verify rates, entities, and math"""
+        s_id = "test_s23_live"
+        
+        # 1. greet & bill dikhao
+        r = process_dialogue_turn(s_id, "Bill dikhao")
+        self.assertEqual(r["intent"], "show_bill")
+        self.assertEqual(len(r["bill"]["items"]), 0)
+
+        # 2. Switch to Hindi
+        r = process_dialogue_turn(s_id, "Switch to Hindi")
+        self.assertEqual(r["intent"], "switch_language_hindi")
+
+        # 3. 3 biscuit packet 20 each -> rate 20
+        r = process_dialogue_turn(s_id, "3 biscuit packet 20 each")
+        self.assertEqual(r["intent"], "add_item")
+        self.assertEqual(r["bill"]["items"][0]["rate"], 20.0)
+        self.assertEqual(r["bill"]["items"][0]["quantity"], 3.0)
+
+        # 4. GST 18% laga do
+        r = process_dialogue_turn(s_id, "GST 18% laga do")
+        self.assertEqual(r["intent"], "add_gst")
+
+        # 5. gst htao
+        r = process_dialogue_turn(s_id, "gst htao")
+        self.assertEqual(r["intent"], "remove_gst")
+        self.assertEqual(r["bill"]["total_tax"], 0.0)
+        self.assertEqual(r["bill"]["grand_total"], 60.0)
+
+        # 6. GST 18% laga do
+        r = process_dialogue_turn(s_id, "GST 18% laga do")
+        self.assertEqual(r["intent"], "add_gst")
+
+        # 7. 5 kilo aalu 20 rupya kilo -> rate 20, name Aalu
+        r = process_dialogue_turn(s_id, "5 kilo aalu 20 rupya kilo")
+        self.assertEqual(r["intent"], "add_item")
+        self.assertEqual(r["bill"]["items"][1]["rate"], 20.0)
+        self.assertEqual(r["bill"]["items"][1]["quantity"], 5.0)
+
+        # 8. 20 kilo pani 2 rupya prati kilo -> rate 2, name Pani
+        r = process_dialogue_turn(s_id, "20 kilo pani 2 rupya prati kilo")
+        self.assertEqual(r["intent"], "add_item")
+        self.assertEqual(r["bill"]["items"][2]["rate"], 2.0)
+        self.assertEqual(r["bill"]["items"][2]["quantity"], 20.0)
+        self.assertEqual(r["bill"]["items"][2]["name"].lower(), "pani")
+
+        # 9. 10% discount do
+        r = process_dialogue_turn(s_id, "10% discount do")
+        self.assertEqual(r["intent"], "apply_discount")
+
+        # 10. Customer Ramesh 9876543210
+        r = process_dialogue_turn(s_id, "Customer Ramesh 9876543210")
+        self.assertEqual(r["intent"], "set_customer")
+        self.assertEqual(r["bill"]["customer_name"], "Ramesh")
+        self.assertIn("3210", r["bill"]["customer_phone_masked"])
+
+        # 11. Customer ka naam ayush chaubey hai -> NOT set_shop_name!
+        r = process_dialogue_turn(s_id, "Customer ka naam ayush chaubey hai")
+        self.assertEqual(r["intent"], "set_customer")
+        self.assertEqual(r["bill"]["customer_name"], "Ayush Chaubey")
+
+        # 12. customer ka mobile number 7983933436 hai
+        r = process_dialogue_turn(s_id, "customer ka mobile number 7983933436 hai")
+        self.assertEqual(r["intent"], "set_customer")
+        self.assertIn("3436", r["bill"]["customer_phone_masked"])
+
+        # 13. ramesh nhi Ayush -> Name updated to Ayush
+        r = process_dialogue_turn(s_id, "ramesh nhi Ayush")
+        self.assertEqual(r["intent"], "set_customer")
+        self.assertEqual(r["bill"]["customer_name"], "Ayush")
+
+        # 14. Print invoice
+        r = process_dialogue_turn(s_id, "Print invoice")
+        self.assertEqual(r["intent"], "finalize_bill")
+
 def run_all_scenarios_report():
     """Runs all 21 test scenarios and returns a structured JSON summary."""
     suite = unittest.TestLoader().loadTestsFromTestCase(TestBillingAgentScenarios)

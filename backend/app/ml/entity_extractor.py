@@ -26,8 +26,12 @@ def extract_shop_type(text: str) -> Optional[str]:
 
 def extract_shop_name(text: str) -> Optional[str]:
     """Extracts shop name from phrases like 'shop name is Sharma Kirana' or 'Mera dukan Mithai House'."""
+    # Reject if customer is mentioned
+    if any(w in text.lower() for w in ["customer", "grahak", "client"]):
+        return None
+        
     patterns = [
-        r'(?:shop name is|dukaan ka naam|dukan ka naam|name is|naam hai|dukan hai)\s*[:=]?\s*([A-Za-z0-9\s\u0900-\u097F]+?)(?:$|\.|\,)',
+        r'(?:shop name is|dukaan ka naam|dukan ka naam|store name is)\s*[:=]?\s*([A-Za-z0-9\s\u0900-\u097F]+?)(?:$|\.|\,)',
         r'(?:mera|meri)\s+([A-Za-z0-9\s\u0900-\u097F]+?)\s+(?:dukan|shop|store)\s+hai'
     ]
     for p in patterns:
@@ -48,17 +52,37 @@ def extract_customer_info(text: str) -> Dict[str, Optional[str]]:
         phone = phone_match.group(1)
 
     name = None
-    # Check for name patterns: "Customer Ramesh", "Customer name Sunita", "Grahak Ramesh"
-    name_patterns = [
-        r'(?:customer(?:\s+name)?|grahak(?:\s+ka\s+naam)?|client)\s*[:=]?\s*([A-Za-z\u0900-\u097F]+)',
-        r'(?:naam|name)\s+(?:is|hai)\s+([A-Za-z\u0900-\u097F]+)'
+    
+    # 1. Check correction pattern first: "ramesh nhi ayush", "ramesh nahi ayush chaubey", "not ramesh ayush"
+    corr_m = re.search(
+        r'(?:[A-Za-z\u0900-\u097F]+)\s+(?:nhi|nahi|not|mat)\s*(?:hai|likho|rakho)?\s+([A-Za-z\s\u0900-\u097F]+?)(?:$|\.|\,)', 
+        text, 
+        re.IGNORECASE
+    )
+    if corr_m:
+        cand = corr_m.group(1).strip()
+        tokens = [t for t in cand.split() if t.lower() not in ['hai', 'is', 'ko', 'bhi', 'rakho', 'likho']]
+        if tokens:
+            name = " ".join(tokens).title()
+            return {"customer_name": name, "phone": phone}
+
+    # 2. Check for name patterns:
+    # "Customer ka naam ayush chaubey hai", "Customer Ramesh 9876543210", "Grahak Sunita"
+    patterns = [
+        r'(?:customer|grahak|client)(?:\s+(?:ka|ki))?\s*(?:naam|name)?\s*(?:hai|is)?\s*([A-Za-z\s\u0900-\u097F]+?)(?:\s+(?:hai|is|[0-9]{10})|$|\.|\,)',
+        r'(?:naam|name)\s+(?:is|hai)\s+([A-Za-z\s\u0900-\u097F]+?)(?:$|\.|\,)',
+        r'(?:customer|grahak)\s+([A-Za-z\s\u0900-\u097F]+)'
     ]
-    for p in name_patterns:
+    for p in patterns:
         m = re.search(p, text, re.IGNORECASE)
         if m:
-            candidate = m.group(1).strip()
-            if candidate.lower() not in ["is", "hai", "ka", "phone", "mobile", "number"]:
-                name = candidate.capitalize()
+            cand = m.group(1).strip()
+            tokens = [
+                t for t in cand.split() 
+                if t.lower() not in ['ka', 'ki', 'ke', 'hai', 'is', 'ko', 'bhi', 'customer', 'grahak', 'naam', 'name', 'phone', 'mobile', 'number']
+            ]
+            if tokens:
+                name = " ".join(tokens).title()
                 break
 
     return {"customer_name": name, "phone": phone}
@@ -133,36 +157,60 @@ def extract_single_item(text: str) -> Dict[str, Any]:
     - 'crocin 1 packet 25 rs'
     """
     clean = normalize_devanagari_digits(text).strip()
+    tokens = clean.split()
     
-    # 1. Price extraction
+    # 1. Price extraction via currency / rate pattern
     rate = parse_currency_amount(clean)
     
-    # 2. Extract quantity and unit
-    # Look for number + unit: '2 kg', '0.5 litre', 'दो किलो', '3 packets', '10'
-    tokens = clean.split()
+    # 2. Extract numbers in utterance to separate quantity vs rate
+    numbers = []
+    for idx, t in enumerate(tokens):
+        v = parse_number_value(t)
+        if v is not None:
+            numbers.append((idx, v))
+            
     qty = 1.0
     unit = "pc"
-    qty_idx = -1
-    unit_idx = -1
-
-    for i, token in enumerate(tokens):
-        val = parse_number_value(token)
-        if val is not None and qty_idx == -1:
-            # Check if this token is actually the price at the end
-            if rate is not None and abs(val - rate) < 1e-4 and i >= len(tokens) - 2:
-                continue
-            qty = val
-            qty_idx = i
-            # Check if next token is a unit
-            if i + 1 < len(tokens):
-                cand_unit = normalize_unit(tokens[i+1])
-                if cand_unit != tokens[i+1].lower() or tokens[i+1].lower() in ["kg", "g", "gm", "litre", "ltr", "pkt", "pc", "pcs", "packet", "strip", "box", "nag", "kilo"]:
+    qty_indices = set()
+    rate_indices = set()
+    
+    # If 2 or more numbers are detected:
+    # First number is quantity, second number is rate!
+    if len(numbers) >= 2:
+        q_idx, q_val = numbers[0]
+        r_idx, r_val = numbers[1]
+        qty = q_val
+        qty_indices.add(q_idx)
+        # Unit after quantity: e.g. "5 kilo aalu", "3 packet biscuit"
+        if q_idx + 1 < len(tokens):
+            cand_unit = normalize_unit(tokens[q_idx + 1])
+            if cand_unit != tokens[q_idx + 1].lower() or tokens[q_idx + 1].lower() in ["kg", "g", "gm", "litre", "ltr", "pkt", "pc", "pcs", "packet", "strip", "box", "nag", "kilo"]:
+                unit = cand_unit
+                qty_indices.add(q_idx + 1)
+        # Rate assignment if not already found or fallback to second number
+        if rate is None or rate == 0.0:
+            rate = r_val
+        rate_indices.add(r_idx)
+        # Mark all trailing rate modifier tokens: "20 each", "20 rupya kilo", "2 rupya prati kilo"
+        for ri in range(r_idx + 1, len(tokens)):
+            rate_indices.add(ri)
+    elif len(numbers) == 1:
+        n_idx, n_val = numbers[0]
+        # Check if this single number is price (e.g., preceded by rate or followed by rs)
+        is_price_token = any(w in clean.lower() for w in ['rs', 'rupee', 'rupay', 'rupya', 'each', 'rate', 'bhav']) and n_idx >= len(tokens) - 2
+        if is_price_token:
+            rate = n_val
+            rate_indices.add(n_idx)
+        else:
+            qty = n_val
+            qty_indices.add(n_idx)
+            if n_idx + 1 < len(tokens):
+                cand_unit = normalize_unit(tokens[n_idx + 1])
+                if cand_unit != tokens[n_idx + 1].lower() or tokens[n_idx + 1].lower() in ["kg", "g", "gm", "litre", "ltr", "pkt", "pc", "pcs", "packet", "strip", "box", "nag", "kilo"]:
                     unit = cand_unit
-                    unit_idx = i + 1
-            break
+                    qty_indices.add(n_idx + 1)
 
     # 3. Item Name extraction:
-    # Match against known HSN items first (supporting plurals like tomatoes, potatoes, biscuits)
     clean_lower = clean.lower()
     matched_item = None
     for item_key in HSN_DATABASE.keys():
@@ -171,32 +219,32 @@ def extract_single_item(text: str) -> Dict[str, Any]:
             break
 
     if not matched_item:
-        # Fallback to eliminating known stop words, numbers, and units
+        # Fallback: remove stop words, rate tokens, and numbers
         stop_words = {
             "add", "jodo", "dalo", "plus", "kar", "do", "karo", "item", "at", "rate", "for", "ka", "ki",
-            "ke", "rupees", "rupay", "rs", "inr", "each", "per", "please", "bhi", "aur", "and", "ek",
-            "kilo", "kg", "packet", "pcs", "piece", "gm", "gram", "litre"
+            "ke", "rupees", "rupay", "rupya", "rupye", "rupiya", "rs", "inr", "each", "per", "prati", "please",
+            "bhi", "aur", "and", "ek", "kilo", "kg", "packet", "pcs", "piece", "gm", "gram", "litre",
+            "रुपये", "रुपया", "पैसे", "प्रति", "भाव", "दर", "वाला", "wali"
         }
         item_words = []
         for i, t in enumerate(tokens):
-            if i == qty_idx or i == unit_idx:
+            if i in qty_indices or i in rate_indices:
                 continue
             val = parse_number_value(t)
             if val is not None:
                 continue
-            if t.lower() in stop_words or t.lower() in ["रुपये", "रुपया", "पैसे"]:
+            if t.lower() in stop_words:
                 continue
             item_words.append(t)
         if item_words:
             matched_item = " ".join(item_words)
 
     # If rate is still not found, check if last number token was price
-    if rate is None and len(tokens) > 1:
+    if (rate is None or rate == 0.0) and len(tokens) > 1:
         last_num = parse_number_value(tokens[-1])
         if last_num is not None and last_num != qty:
             rate = last_num
 
-    # Default rate if not provided (e.g. for bulk add: '10 tomatoes' -> default rate ₹30/kg or ₹20/pc)
     if rate is None:
         rate = 0.0
 

@@ -130,16 +130,20 @@ def process_dialogue_turn(session_id: str, text: str) -> Dict[str, Any]:
             return build_turn_response(session, intent, confidence, reply, reply)
 
     if session.state == "ONBOARDING_SHOP_NAME" or intent == "set_shop_name":
-        sn = extract_shop_name(text)
-        if not sn:
-            sn = text.strip().title()
-        session.shop_info["name"] = sn
-        session.state = "BILLING"
-        if session.language == "hi":
-            reply = f"शानदार! '{sn}' अब बिलिंग के लिए तैयार है। सामान जोड़ना शुरू करें (जैसे: 2 किलो चावल 60 रुपये)।"
+        if any(w in text.lower() for w in ["customer", "grahak", "client"]):
+            intent = "set_customer"
         else:
-            reply = f"Excellent! '{sn}' is ready for billing. Start adding items (e.g., '2 kg rice at 60 rupees')."
-        return build_turn_response(session, intent, confidence, reply, reply)
+            sn = extract_shop_name(text)
+            if not sn and session.state == "ONBOARDING_SHOP_NAME":
+                sn = text.strip().title()
+            if sn:
+                session.shop_info["name"] = sn
+                session.state = "BILLING"
+                if session.language == "hi":
+                    reply = f"शानदार! '{sn}' अब बिलिंग के लिए तैयार है। सामान जोड़ना शुरू करें (जैसे: 2 किलो चावल 60 रुपये)।"
+                else:
+                    reply = f"Excellent! '{sn}' is ready for billing. Start adding items (e.g., '2 kg rice at 60 rupees')."
+                return build_turn_response(session, intent, confidence, reply, reply)
 
     # Validate GSTIN
     if intent == "validate_gstin" or ("gst" in text.lower() and len(text.replace(" ", "")) >= 15):

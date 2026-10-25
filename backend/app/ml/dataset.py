@@ -421,18 +421,27 @@ def generate_massive_training_dataset(target_size: int = 10000) -> List[Tuple[st
     names = [
         "Ramesh", "Suresh", "Mahesh", "Rajesh", "Sunita", "Anita", "Pooja", "Vikram",
         "Amit", "Rahul", "Dinesh", "Kavita", "Deepak", "Manoj", "Pankaj", "Vikas",
-        "Rohit", "Sachin", "Vijay", "Neeraj", "Priya", "Anjali", "Sanjay", "Alok"
+        "Rohit", "Sachin", "Vijay", "Neeraj", "Priya", "Anjali", "Sanjay", "Alok",
+        "Ayush", "Ayush Chaubey", "Gaurav", "Manish", "Abhishek", "Prashant"
     ]
     cust_templates = [
         "customer {name}", "customer name {name}", "grahak {name}",
+        "customer ka naam {name} hai", "customer ka naam {name}", "customer name is {name}",
+        "grahak ka naam {name} hai", "grahak ka naam {name}",
+        "customer ka mobile number {phone} hai", "customer ka mobile {phone} hai",
+        "customer ka phone number {phone} hai", "customer ka number {phone} hai",
         "phone {phone}", "mobile {phone}", "customer {name} phone {phone}",
         "grahak {name} mobile number {phone}", "client is {name} contact {phone}",
-        "billo to {name} {phone}", "customer details {name} {phone}"
+        "billo to {name} {phone}", "customer details {name} {phone}",
+        "{old_name} nhi {name}", "{old_name} nahi {name}", "{old_name} not {name}"
     ]
-    for _ in range(500):
+    for _ in range(600):
         n = random.choice(names)
+        old_n = random.choice(names)
+        while old_n == n:
+            old_n = random.choice(names)
         ph = f"98{random.randint(10000000, 99999999)}"
-        t_cust = random.choice(cust_templates).format(name=n, phone=ph)
+        t_cust = random.choice(cust_templates).format(name=n, old_name=old_n, phone=ph)
         dataset.append((t_cust, "set_customer"))
 
     # 9. Synthesize "set_shop_name" & "setup_shop" (400+ samples)

@@ -105,33 +105,39 @@ def normalize_unit(unit_raw: str) -> str:
 
 def parse_currency_amount(text: str) -> Optional[float]:
     """
-    Extracts Indian currency amounts like:
-    '₹1,200.50', '1200.5 rupees', '60 rs', '₹45', '75 rupay', 'पैंसठ रुपये'
+    Extracts Indian currency amounts and item rates like:
+    '₹1,200.50', '60 rs', '20 rupya', '2 rupya prati kilo', '20 each', 'rate 20', '75 rupay', 'पैंसठ रुपये'
     """
     text = normalize_devanagari_digits(text)
     
-    # Check for ₹1,200.50 or Rs 1,200
-    m = re.search(r'(?:₹|rs\.?|inr|rupees?|rupay?|रुपये?)\s*([0-9]+(?:,[0-9]+)*(?:\.[0-9]+)?)', text, re.IGNORECASE)
+    # 1. Currency / Rate Prefix: ₹1,200.50, Rs 1,200, rate 20, rate: 20, bhav 50
+    m = re.search(r'(?:₹|rs\.?|inr|rupees?|rupay|rupya|rupye|rupiya|रुपये?|रुपया|rate|bhav|भाव|दर)\s*[:=]?\s*([0-9]+(?:,[0-9]+)*(?:\.[0-9]+)?)', text, re.IGNORECASE)
     if m:
-        num_str = m.group(1).replace(',', '')
         try:
-            return float(num_str)
+            return float(m.group(1).replace(',', ''))
         except ValueError:
             pass
 
-    # Check for 60 rs, 1200.50 rupees
-    m = re.search(r'([0-9]+(?:,[0-9]+)*(?:\.[0-9]+)?)\s*(?:₹|rs\.?|inr|rupees?|rupay?|रुपये?|/-)', text, re.IGNORECASE)
+    # 2. Currency / Rate Suffix: 60 rs, 20 rupya, 2 rupya prati, 20 each, 20 per pc, 20/-
+    m = re.search(r'([0-9]+(?:,[0-9]+)*(?:\.[0-9]+)?)\s*(?:₹|rs\.?|inr|rupees?|rupay|rupya|rupye|rupiya|रुपये?|रुपया|/-|each|per\b|prati\b|प्रति\b)', text, re.IGNORECASE)
     if m:
-        num_str = m.group(1).replace(',', '')
         try:
-            return float(num_str)
+            return float(m.group(1).replace(',', ''))
         except ValueError:
             pass
 
-    # Check for Devanagari number words followed by रुपये
+    # 3. Check for at / @ rate: 'at 60', '@ 20'
+    m = re.search(r'(?:at|@)\s*([0-9]+(?:,[0-9]+)*(?:\.[0-9]+)?)', text, re.IGNORECASE)
+    if m:
+        try:
+            return float(m.group(1).replace(',', ''))
+        except ValueError:
+            pass
+
+    # 4. Check for words followed by रुपये, rupya, each, etc.
     tokens = text.split()
     for i, token in enumerate(tokens):
-        if token in ['रुपये', 'रुपया', 'rupay', 'rupees', 'rs', 'ka']:
+        if token.lower() in ['रुपये', 'रुपया', 'rupay', 'rupya', 'rupye', 'rupiya', 'rupees', 'rs', 'each', 'prati', 'प्रति']:
             if i > 0:
                 prev_val = parse_number_value(tokens[i-1])
                 if prev_val is not None:

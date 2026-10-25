@@ -35,6 +35,8 @@ HSN_DATABASE: Dict[str, Dict[str, Any]] = {
     "tea": {"hsn": "0902", "rate": 5.0, "category": "Kirana / Beverages", "description": "Black / Green Tea"},
     "chai patti": {"hsn": "0902", "rate": 5.0, "category": "Kirana / Beverages", "description": "Tea Leaves"},
     "coffee": {"hsn": "0901", "rate": 5.0, "category": "Kirana / Beverages", "description": "Coffee Beans / Powder"},
+    "pani": {"hsn": "2201", "rate": 18.0, "category": "Beverages", "description": "Packaged Drinking Water"},
+    "water": {"hsn": "2201", "rate": 18.0, "category": "Beverages", "description": "Packaged Drinking Water"},
     "biscuit": {"hsn": "1905", "rate": 18.0, "category": "Kirana / Snacks", "description": "Biscuits & Cookies"},
     "biscuits": {"hsn": "1905", "rate": 18.0, "category": "Kirana / Snacks", "description": "Biscuits & Cookies"},
     "chips": {"hsn": "2005", "rate": 12.0, "category": "Kirana / Snacks", "description": "Potato Chips / Namkeen"},
