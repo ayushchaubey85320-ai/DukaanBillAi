@@ -204,6 +204,18 @@ def process_dialogue_turn(session_id: str, text: str) -> Dict[str, Any]:
                         break
                 
                 if existing:
+                    # Check if user is defining/updating unit price: "1 biscuit 5 rupya ka hai", "biscuit 5 rupya ka hai"
+                    is_price_definition = any(w in clean_lower for w in ["ka hai", "prati", "each", "per", "rate", "bhav", "daam"])
+                    if is_price_definition and item_data["rate"] > 0:
+                        existing["rate"] = item_data["rate"]
+                        existing["price"] = item_data["rate"]
+                        bill = session.get_bill_summary()
+                        if session.language == "hi":
+                            reply = f"{existing['name']} का रेट बदलकर ₹{existing['rate']:.2f} कर दिया। नया कुल: ₹{bill['grand_total']:.2f}।"
+                        else:
+                            reply = f"Updated {existing['name']} rate to ₹{existing['rate']:.2f}. New Total: ₹{bill['grand_total']:.2f}."
+                        return build_turn_response(session, intent, confidence, reply, reply, timeout_warning)
+
                     if not is_explicit_add and not has_price_mentioned:
                         # User is adjusting/setting quantity (e.g. "sugar 3 kg")
                         existing["quantity"] = item_data["quantity"]
@@ -226,36 +238,40 @@ def process_dialogue_turn(session_id: str, text: str) -> Dict[str, Any]:
 
     # Change Quantity
     if intent == "change_quantity":
-        item_data = extract_single_item(text)
-        target_name = item_data.get("name", "").lower()
-        new_qty = item_data.get("quantity", 1.0)
-        
-        found = False
-        for itm in session.items:
-            if target_name in itm["name"].lower() or itm["name"].lower() in target_name:
-                itm["quantity"] = new_qty
-                found = True
-                target_name = itm["name"]
-                break
-        
-        if not found and session.items:
-            # Change quantity of the last item
-            session.items[-1]["quantity"] = new_qty
-            target_name = session.items[-1]["name"]
-            found = True
-
-        bill = session.get_bill_summary()
-        if found:
-            if session.language == "hi":
-                reply = f"{target_name} की मात्रा बदलकर {new_qty} कर दी। नया कुल: ₹{bill['grand_total']:.2f}।"
-            else:
-                reply = f"Updated {target_name} quantity to {new_qty}. New Total: ₹{bill['grand_total']:.2f}."
+        # Guard: If utterance mentions rate, price, per, each, rupya -> redirect to change_rate!
+        if any(w in text.lower() for w in ["rate", "price", "bhav", "daam", "rupya", "rupay", "rupy", "rs", "prati", "per", "each", "प्रति"]):
+            intent = "change_rate"
         else:
-            if session.language == "hi":
-                reply = "कोई आइटम नहीं मिला जिसकी मात्रा बदलनी हो।"
+            item_data = extract_single_item(text)
+            target_name = item_data.get("name", "").lower()
+            new_qty = item_data.get("quantity", 1.0)
+            
+            found = False
+            for itm in session.items:
+                if target_name in itm["name"].lower() or itm["name"].lower() in target_name:
+                    itm["quantity"] = new_qty
+                    found = True
+                    target_name = itm["name"]
+                    break
+            
+            if not found and session.items:
+                # Change quantity of the last item
+                session.items[-1]["quantity"] = new_qty
+                target_name = session.items[-1]["name"]
+                found = True
+
+            bill = session.get_bill_summary()
+            if found:
+                if session.language == "hi":
+                    reply = f"{target_name} की मात्रा बदलकर {new_qty} कर दी। नया कुल: ₹{bill['grand_total']:.2f}।"
+                else:
+                    reply = f"Updated {target_name} quantity to {new_qty}. New Total: ₹{bill['grand_total']:.2f}."
             else:
-                reply = "Could not find that item in the current bill."
-        return build_turn_response(session, intent, confidence, reply, reply)
+                if session.language == "hi":
+                    reply = "कोई आइटम नहीं मिला जिसकी मात्रा बदलनी हो।"
+                else:
+                    reply = "Could not find that item in the current bill."
+            return build_turn_response(session, intent, confidence, reply, reply)
 
     # Change Item Rate / Price
     if intent in ["change_rate", "change_price"]:

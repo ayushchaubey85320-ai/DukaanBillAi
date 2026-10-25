@@ -382,6 +382,46 @@ class TestBillingAgentScenarios(unittest.TestCase):
         self.assertEqual(r6["bill"]["items"][0]["gst_rate"], 50.0)
         self.assertEqual(r6["bill"]["grand_total"], 60.0) # 2 * 20 = 40 + 50% GST = 60
 
+    def test_scenario_25_mobile_biscuit_rate_change(self):
+        """Scenario 25: Replay user's mobile test sequence with rate changes on Biscuit"""
+        s_id = "test_s25_mobile"
+        
+        # 1. 3 biscuit packet 20 each
+        r1 = process_dialogue_turn(s_id, "3 biscuit packet 20 each")
+        self.assertEqual(r1["intent"], "add_item")
+        self.assertEqual(r1["bill"]["items"][0]["quantity"], 3.0)
+        self.assertEqual(r1["bill"]["items"][0]["rate"], 20.0)
+
+        # 2. Switch to Hindi
+        r2 = process_dialogue_turn(s_id, "Switch to Hindi")
+        self.assertEqual(r2["intent"], "switch_language_hindi")
+
+        # 3. biscuit change krke 5 rupya prati peice -> Rate updated to 5.0 (NOT quantity!)
+        r3 = process_dialogue_turn(s_id, "biscuit change krke 5 rupya prati peice")
+        self.assertEqual(r3["intent"], "change_rate")
+        self.assertEqual(r3["bill"]["items"][0]["rate"], 5.0)
+        self.assertEqual(r3["bill"]["items"][0]["quantity"], 3.0)
+
+        # 4. 1 biscuit 5 rupya ka hai -> Updates rate (still 5), doesn't corrupt quantity
+        r4 = process_dialogue_turn(s_id, "1 biscuit 5 rupya ka hai")
+        self.assertEqual(r4["bill"]["items"][0]["rate"], 5.0)
+
+        # 5. biscuit ka price change kro 5 rupya per biscuit
+        r5 = process_dialogue_turn(s_id, "biscuit ka price change kro 5 rupya per biscuit")
+        self.assertEqual(r5["intent"], "change_rate")
+        self.assertEqual(r5["bill"]["items"][0]["rate"], 5.0)
+
+        # 6. gst htao
+        r6 = process_dialogue_turn(s_id, "gst htao")
+        self.assertEqual(r6["intent"], "remove_gst")
+        self.assertEqual(r6["bill"]["total_tax"], 0.0)
+        self.assertEqual(r6["bill"]["grand_total"], 15.0) # 3 * 5 = 15
+
+        # 7. ab kitna hua
+        r7 = process_dialogue_turn(s_id, "ab kitna hua")
+        self.assertEqual(r7["intent"], "show_bill")
+        self.assertEqual(r7["bill"]["grand_total"], 15.0)
+
 def run_all_scenarios_report():
     """Runs all 21 test scenarios and returns a structured JSON summary."""
     suite = unittest.TestLoader().loadTestsFromTestCase(TestBillingAgentScenarios)

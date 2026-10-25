@@ -42,11 +42,24 @@ def predict_intent(text: str) -> Dict[str, Any]:
         return {"intent": "set_customer", "confidence": 0.99, "clean_text": cleaned}
 
     # Rate / Price Change / Modification
-    # e.g. "peti tile rate change krdo 20 rupya prati", "rice ka rate 20 rupy prati kilo hai", "rate 25 kar do"
-    if any(w in lower_t for w in ["rate change", "price change", "bhav change", "daam change", "rate badlo", "rate badal"]) or \
-       re.search(r'\b(?:rate|bhav|daam|price|रेट|भाव|दर|दाम)\s+.*(?:hai|krdo|karo|kar do|kardena|change|badlo|badal|hoga)', lower_t) or \
-       re.search(r'\b[A-Za-z\u0900-\u097F]+\s+ka\s+(?:rate|bhav|daam|price)\s+[0-9]+', lower_t) or \
-       re.search(r'\b(?:change|update)\s+.*(?:rate|price|bhav|daam)', lower_t):
+    # Rate / Price Change / Modification
+    # e.g.:
+    # - "peti tile rate change krdo 20 rupya prati"
+    # - "rice ka rate 20 rupy prati kilo hai"
+    # - "biscuit change krke 5 rupya prati peice"
+    # - "biscuit ka price change kro 5 rupya per biscuit"
+    # - "1 biscuit 5 rupya ka hai"
+    # - "rate 25 kar do"
+    is_rate_change = (
+        any(w in lower_t for w in ["rate change", "price change", "bhav change", "daam change", "rate badlo", "rate badal"]) or
+        (any(w in lower_t for w in ["change", "badal", "badlo"]) and any(w in lower_t for w in ["prati", "per", "each", "प्रति", "rate", "price", "bhav", "daam"])) or
+        bool(re.search(r'\b(?:rate|bhav|daam|price|रेट|भाव|दर|दाम)\s+.*(?:hai|krdo|karo|kar do|kardena|change|badlo|badal|hoga)', lower_t)) or
+        bool(re.search(r'\b[A-Za-z\u0900-\u097F]+\s+ka\s+(?:rate|bhav|daam|price)\s+[0-9]+', lower_t)) or
+        bool(re.search(r'\b(?:change|update)\s+.*(?:rate|price|bhav|daam)', lower_t)) or
+        bool(re.search(r'\b(?:1|ek)\s+[A-Za-z\u0900-\u097F]+\s+[0-9]+(?:\.[0-9]+)?\s*(?:rupya|rupay|rupy|rupees|rs|रुपये|रुपया)\s*(?:ka\s*hai|hai)', lower_t)) or
+        (bool(re.search(r'[0-9]+(?:\.[0-9]+)?\s*(?:rupya|rupay|rupy|rupees|rs|रुपये|रुपया)?\s*(?:prati|per|each|प्रति)\s*(?:piece|peice|pc|packet|kilo|kg|nag)?', lower_t)) and any(w in lower_t for w in ["change", "krdo", "karo", "badlo", "rate", "price"]))
+    )
+    if is_rate_change:
         return {"intent": "change_rate", "confidence": 0.99, "clean_text": cleaned}
 
     # GST Handling: Remove GST vs Add GST
@@ -109,6 +122,11 @@ def predict_intent(text: str) -> Dict[str, Any]:
             if predicted_intent == "change_rate" and not any(w in lower_t for w in ["rate", "bhav", "daam", "price", "badlo", "change", "रेट", "भाव", "दर", "दाम"]):
                 predicted_intent = "add_item"
                 confidence = 0.90
+
+            # Guard: If model misclassified change_rate as change_quantity
+            if predicted_intent == "change_quantity" and any(w in lower_t for w in ["rate", "price", "bhav", "daam", "rupya", "rupay", "rupy", "rs", "prati", "per", "each", "प्रति"]):
+                predicted_intent = "change_rate"
+                confidence = 0.99
 
             return {
                 "intent": predicted_intent,

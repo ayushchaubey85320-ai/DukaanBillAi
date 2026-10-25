@@ -4,20 +4,42 @@
  */
 
 // Dynamic API Base URL resolver: checks user preference -> online public tunnel -> local network -> localhost
+export const DEFAULT_RENDER_URL = "https://dukaanbillai.onrender.com";
+export const DEFAULT_ONLINE_URL = "https://dukaanbillai.onrender.com";
+export const DEFAULT_LAN_URL = "http://192.168.1.14:8001";
+export const DEFAULT_LOCAL_URL = "http://127.0.0.1:8001";
+
+// Dynamic API Base URL resolver: Render Cloud Server -> Current Origin -> Localhost
 export function getApiBase() {
   const custom = localStorage.getItem("dukaan_backend_url");
   if (custom && custom.trim()) {
-    return custom.trim().replace(/\/+$/, "") + (custom.includes("/api") ? "" : "/api");
+    // If old stale loca.lt URL was saved from earlier tests, clear it
+    if (custom.includes("loca.lt")) {
+      localStorage.removeItem("dukaan_backend_url");
+    } else {
+      return custom.trim().replace(/\/+$/, "") + (custom.includes("/api") ? "" : "/api");
+    }
   }
-  // If running in Capacitor native Android app, default to the live online public tunnel
-  const isNative = window.Capacitor?.isNativePlatform?.() || 
-                   window.location.protocol === "file:" || 
-                   (window.location.hostname === "localhost" && window.location.port !== "5174");
-  if (isNative) {
-    return "https://dukaanai-live.loca.lt/api";
+
+  // 1. If running in a web browser:
+  if (typeof window !== "undefined" && window.location) {
+    const host = window.location.hostname;
+    const port = window.location.port;
+
+    // Local dev server only (Vite running on localhost:5174) -> point to local Python backend on 8001
+    if ((host === "localhost" || host === "127.0.0.1") && port === "5174") {
+      return "http://127.0.0.1:8001/api";
+    }
+
+    // Any hosted website (Render, custom domain, or local IP in browser) -> always use same origin!
+    if (host && host !== "localhost" && host !== "127.0.0.1" && window.location.protocol.startsWith("http")) {
+      return `${window.location.origin}/api`;
+    }
   }
-  // Standard web browser running on local dev server
-  return "http://127.0.0.1:8001/api";
+
+  // 2. If running inside Capacitor native Android APK or standalone:
+  // Render is the primary cloud backend service!
+  return `${DEFAULT_RENDER_URL}/api`;
 }
 
 export function setApiBase(url) {
@@ -27,10 +49,6 @@ export function setApiBase(url) {
     localStorage.setItem("dukaan_backend_url", url.trim().replace(/\/+$/, ""));
   }
 }
-
-export const DEFAULT_ONLINE_URL = "https://dukaanai-live.loca.lt";
-export const DEFAULT_LAN_URL = "http://192.168.1.14:8001";
-export const DEFAULT_LOCAL_URL = "http://127.0.0.1:8001";
 
 // Default fetch helper with tunnel bypass headers
 async function fetchWithBypass(url, options = {}) {

@@ -117,12 +117,12 @@ export default function ServerSettingsModal({ isOpen, onClose, onServerChanged }
             Select Connection Mode:
           </label>
 
-          {/* Preset 1: Online Cloud Tunnel */}
+          {/* Preset 1: Render Cloud Server (Main) */}
           <button
             type="button"
             onClick={() => handleSelectPreset(DEFAULT_ONLINE_URL)}
             className={`w-full text-left p-3.5 rounded-xl border transition flex items-start gap-3 ${
-              currentUrl.includes("loca.lt")
+              currentUrl.includes("onrender.com") || currentUrl.includes("dukaanbillai")
                 ? "bg-emerald-950/40 border-emerald-500 text-white"
                 : "bg-gray-800/40 border-gray-700/60 hover:bg-gray-800 text-gray-300"
             }`}
@@ -132,11 +132,11 @@ export default function ServerSettingsModal({ isOpen, onClose, onServerChanged }
             </div>
             <div className="flex-1">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-semibold text-white">🌐 Online Cloud Tunnel (Recommended for Mobile Data)</span>
-                <span className="text-[10px] bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full font-bold">4G/5G Ready</span>
+                <span className="text-sm font-semibold text-white">☁️ Render Cloud Service (Primary Online)</span>
+                <span className="text-[10px] bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full font-bold">Main Server</span>
               </div>
               <p className="text-xs text-gray-400 mt-0.5">{DEFAULT_ONLINE_URL}</p>
-              <p className="text-[11px] text-gray-500 mt-0.5">Connects anywhere in India without needing Wi-Fi.</p>
+              <p className="text-[11px] text-gray-500 mt-0.5">High availability cloud server on Render for all devices & APK.</p>
             </div>
           </button>
 
