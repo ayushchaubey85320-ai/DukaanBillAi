@@ -1,0 +1,1202 @@
+[
+  {
+    "utterance": "Yaar, mera Ola driver last minute pe cancel kar diya! Ab kya karu, meeting ke liye late ho raha hoon.",
+    "intent": "remove_item",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "customer_support"
+  },
+  {
+    "utterance": "Bhai, mujhe thoda nahi samajh aa raha AIR India app pe apna account kaise add karna hai, help kar de.",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "customer_support"
+  },
+  {
+    "utterance": "Bhai, mujhe nahi samajh aa raha ki AI Engineer banna sahi hai ya Software Engineer. Tumhare hisaab se kya acha hai? Bas, kuch guidance chahiye.",
+    "intent": "add_item",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "question"
+  },
+  {
+    "utterance": "Mere speaker on nahi ho raha hai, samajh nahi aa raha kya karu yaar.",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "customer_support"
+  },
+  {
+    "utterance": "Mujhe mera credit card return nahi mila hai, help karo na yaar.",
+    "intent": "remove_item",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "customer_support"
+  },
+  {
+    "utterance": "Arre, yeh email jo maine likha hai, kya yeh aggressive lag raha hai? \"Dear team, mujhe yeh service thodi behtar chahiye thi. Aisa nahi hona chahiye tha.\"",
+    "intent": "add_item",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "sentiment"
+  },
+  {
+    "utterance": "Yaar, mera Zomato order aaya hi nahi, sirf half order mila hai. Kya scene hai bhai?",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "customer_support"
+  },
+  {
+    "utterance": "Bhai, mera Ola driver last minute pe cancel kar diya! Ab main kya karun? Tiffin delivery ke liye time bilkul nahi hai.",
+    "intent": "remove_item",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "customer_support"
+  },
+  {
+    "utterance": "Bhai, mujhe AIR India app pe account add karna hai, kya karna padega? I want saari benefits milen.",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "customer_support"
+  },
+  {
+    "utterance": "Yaar, mera mobile battery bahut heat ho raha hai aur puffed bhi ho gaya hai. Kya karun?",
+    "intent": "affirm",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "customer_support"
+  },
+  {
+    "utterance": "Yaar, mera IRCTC ticket booking ka process fail ho gaya. Kya dikkat ho rahi hai na?",
+    "intent": "affirm",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "customer_support"
+  },
+  {
+    "utterance": "Yaar, gym nahi gaya kuch din se. Ab toh aisa lag raha hai ki out of shape ho gaya hoon. Weekend pe kuch plan hai kya?",
+    "intent": "affirm",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "casual"
+  },
+  {
+    "utterance": "Bhai, Thailand jaane ke liye visa ka kya scene hai? Kya karna padta hai?",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "question"
+  },
+  {
+    "utterance": "Arey bhai, kitne time ho gaye hum mil nahi paaye! Kaise ho? Zomato ki delivery chalu hai kya aaj kal?",
+    "intent": "greet",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "casual"
+  },
+  {
+    "utterance": "Arey bhai, maine ek shirt order kari thi par galat color aa gaya. Ab kya karun return karne ke liye?",
+    "intent": "remove_item",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "customer_support"
+  },
+  {
+    "utterance": "Bhai, mujhe borderline diabetes hai. Kya khana chahiye iske liye? Kuch healthy suggestions do na.",
+    "intent": "add_item",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "question"
+  },
+  {
+    "utterance": "Yaar, abhi maine uss Bollywood movie 'Pathaan' dekhi, kaafi maza aaya! Tu ne dekhi hai?",
+    "intent": "affirm",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "casual"
+  },
+  {
+    "utterance": "Arre yaar, mera Amazon ka order kaafi late ho gaya hai. Kya pata iska kya scene hai?",
+    "intent": "affirm",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "customer_support"
+  },
+  {
+    "utterance": "Maine ek email bheja hai customer ko, bas check kar lo. Kya ye aggressive lag raha hai ya polite? 'Aapki service bahut bekar hai, main aapse kuch nahi kharidungi.'",
+    "intent": "add_item",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "sentiment"
+  },
+  {
+    "utterance": "Yaar, summer mein power cuts toh bahut annoying ho gaye hain na? Delhi aur Bangalore ka comparison karte hain, wahaan toh kitna hota hoga!",
+    "intent": "affirm",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "casual"
+  },
+  {
+    "utterance": "Yaar, kab pata chalega ki mujhe therapist se milne ki zarurat hai? Lagta hai kabhi kabhi zyada hi ghamon mein duba rehta hoon.",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "question"
+  },
+  {
+    "utterance": "Yaar, kya main apne apartment mein rehne par HRA claim kar sakta hoon?",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "question"
+  },
+  {
+    "utterance": "Yaar, mera return status check karne ka mann hai. Item pick hua tha, lekin abhi bhi 'not picked' dikhata hai. Kya ho raha hai?",
+    "intent": "set_payment_mode",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "customer_support"
+  },
+  {
+    "utterance": "Indiranagar mein date night ke liye koi achha restaurant recommend kar sakte ho? Kya pata, kuch special chahiye.",
+    "intent": "add_item",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "question"
+  },
+  {
+    "utterance": "Bhai, electricity bill aa gaya hai. Thoda ho gaya hai, split karna padega? Itna sa hi hai na?",
+    "intent": "affirm",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "casual"
+  },
+  {
+    "utterance": "Bhai, mujhe 30 tak financially independent hona hai, lekin time nahi milta hai. Kya karun yaar?",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "question"
+  },
+  {
+    "utterance": "Bhai, scooty lene ka soch raha hoon, par emi ka kya scene hai? Matlab, kaise chalega?",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "customer_support"
+  },
+  {
+    "utterance": "Bhai, mujhe ek kapda order kiya tha par galat color aaya hai. Kya karna hai ab?",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "customer_support"
+  },
+  {
+    "utterance": "Yaar, kabhi kabhi sochta hoon ki mujhe apne career ke baare mein aur sochna chahiye. Matlab, startup karna theek hai par future kya hai?",
+    "intent": "add_item",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "casual"
+  },
+  {
+    "utterance": "Yaar, mujhe under 30K ek naya phone lena hai, koi suggestion hai? Thoda achha camera aur performance chahiye.",
+    "intent": "add_item",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "casual"
+  },
+  {
+    "utterance": "Bhai, mujhe data science ke liye achha laptop kharidna hai, budget 80K tak hai. Kahan se leun? Kya pata kuch recommend kar sakte ho?",
+    "intent": "add_item",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "question"
+  },
+  {
+    "utterance": "Yaar, Vodafone ka bill aaya aur data charge zyada hai, samajh nahi aa raha kyun hua ye. Kuch help kar sakte ho?",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "customer_support"
+  },
+  {
+    "utterance": "arre yaar, mujhe borderline diabetes hai, kya khana chahiye iske liye?",
+    "intent": "add_item",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "question"
+  },
+  {
+    "utterance": "Yaar, main soch raha hoon holiday pe jaana hai, china ya Dubai? Kahan jaana chahiye?",
+    "intent": "add_item",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "question"
+  },
+  {
+    "utterance": "Bhai, maine Blinkit pe order kiya hai lekin address change karna hai, kaise karun yaar?",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "customer_support"
+  },
+  {
+    "utterance": "Mujhe samajh nahi aa raha, kab pata chalega ki mujhe therapist ke paas jaana chahiye? Thoda stressful chal raha hai sab.",
+    "intent": "add_item",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "question"
+  },
+  {
+    "utterance": "Mujhe yeh comment mila YouTube pe, 'Ye song sunke toh dil khush ho gaya!'. Iska kya sentiment hai, yaar?",
+    "intent": "affirm",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "sentiment"
+  },
+  {
+    "utterance": "Yaar, kal Eid hai na? Kya chutti milegi kya?",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "question"
+  },
+  {
+    "utterance": "Bhai, Indiranagar mein date night ke liye kuch achha restaurant recommend kar sakte ho?",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "question"
+  },
+  {
+    "utterance": "Bhai, BookMyShow pe maine movie ticket book kiya tha, lekin abhi pending dikh raha hai. Kya karu?",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "customer_support"
+  },
+  {
+    "utterance": "Mere mobile ki battery itni garam ho rahi hai aur puffed bhi ho gayi hai, kya karun yaar?",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "customer_support"
+  },
+  {
+    "utterance": "Yaar, mujhe AIR India app pe apna account kaise add karna hai, thoda help karo na.",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "customer_support"
+  },
+  {
+    "utterance": "Bhai, bank ke customer support se kaise baat karun, mujhe kuch samajh nahi aa raha.",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "customer_support"
+  },
+  {
+    "utterance": "Bhai, mujhe home loan ke liye apply karna hai, lekin nahi pata eligibility kaise check karu. Kya karu?",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "question"
+  },
+  {
+    "utterance": "Yaar, kal EID hai kya? Holiday hoga kya pata?",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "question"
+  },
+  {
+    "utterance": "Bro, mera return status check karo na, item pick hua hai par abhi bhi 'not picked' dikh raha hai. Kya scene hai?",
+    "intent": "remove_item",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "customer_support"
+  },
+  {
+    "utterance": "Mujhe IRCTC pe train ticket book karne me problem ho rahi hai, kyun fail ho raha hai yaar? Bahut tension ho raha hai.",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "customer_support"
+  },
+  {
+    "utterance": "Arey bhai, mere Swiggy order mein ek item missing hai, mujhe kya karna chahiye?",
+    "intent": "add_item",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "customer_support"
+  },
+  {
+    "utterance": "Thailand ke liye visa kaise apply karna hai yaar? Kya documents chahiye?",
+    "intent": "add_item",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "question"
+  },
+  {
+    "utterance": "Mujhe samajh nahi aa raha, yaar. MNC join karoon ya startup? Kahan jaake zyada growth milegi?",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "question"
+  },
+  {
+    "utterance": "Bhai, mujhe samajh nahi aa raha MBA karun ya seedha job join karun engineering ke baad. Kya sahi rahega?",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "question"
+  },
+  {
+    "utterance": "Bhai, mujhe running shuru karni hai. Kahan se shuru karun, matlab kuch tips do na.",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "question"
+  },
+  {
+    "utterance": "Hey yaar, maine apne account ka password bhool gaya hoon. Kya pata kaise update karun mobile pe?",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "customer_support"
+  },
+  {
+    "utterance": "Yaar, mujhe Flipkart pe ek product return karna hai, lekin refund kaise milega, pata nahi. Thoda help kar na.",
+    "intent": "remove_item",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "customer_support"
+  },
+  {
+    "utterance": "Yaar, blinkit se jo sabzi mangaayi thi, wo toh badh gyi hai. Kya karun ab?",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "customer_support"
+  },
+  {
+    "utterance": "Yaar, mujhe US tourist visa ke interview ke liye prepare karna hai. Kya tips doge?",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "question"
+  },
+  {
+    "utterance": "Bro, mujhe SIP mutual funds ke baare mein thoda bata na. Main chaar saal se kaam kar raha hoon, har mahine 5K invest karna chahta hoon. Kahan se shuru karun?",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "question"
+  },
+  {
+    "utterance": "Bhai, long weekend pe Goa ya Pondicherry jaana chahiye? Matlab, kya kya dekhne ko milega dono jagah pe?",
+    "intent": "add_item",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "question"
+  },
+  {
+    "utterance": "Bhai, mera return status check karne par yeh dikh raha hai ki item still not picked hai, par actually picked ho gaya tha. Kya karna chahiye?",
+    "intent": "add_item",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "customer_support"
+  },
+  {
+    "utterance": "BookMyShow pe maine movie ticket book kiya tha, lekin abhi bhi pending dikhata hai. Kya kabhi kabhi aisa hota hai ya koi dikkat hai?",
+    "intent": "set_payment_mode",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "customer_support"
+  },
+  {
+    "utterance": "kal office jaane ka soch raha hoon ya ghar se kaam karoon, kya karna chahiye?",
+    "intent": "add_item",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "casual"
+  },
+  {
+    "utterance": "Yaar, mera Ola driver last minute pe cancel kar diya. Ab kya karoon? Thoda time waste ho gaya hai.",
+    "intent": "remove_item",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "customer_support"
+  },
+  {
+    "utterance": "Mera credit score recently thoda drop ho gaya hai, kya karun yaar improve karne ke liye?",
+    "intent": "affirm",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "question"
+  },
+  {
+    "utterance": "bhai, tumhe kya lagta hai, swimming zyada acchi hai ya gym jana? mujhe samajh nahi aa raha hai.",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "question"
+  },
+  {
+    "utterance": "Bhai, mere Zomato order se ek item missing hai. Kya karu ab? Chhod na, maine toh pehle bhi complain kiya hai par kuch nahi hota.",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "customer_support"
+  },
+  {
+    "utterance": "Bhaisahab, mujhe samajh nahi aa raha ki main China jaun ya Dubai for holiday. Kya karun?",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "question"
+  },
+  {
+    "utterance": "Mere credit card statement pe galat charge aa gaya hai, ise dispute kaise karu? Bas samajh nahi aa raha.",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "customer_support"
+  },
+  {
+    "utterance": "Bhai, mujhe ek scooty kharidni hai. EMI kaise chalu karte hain? Koi achha option bata na.",
+    "intent": "add_item",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "customer_support"
+  },
+  {
+    "utterance": "Cold coffee ka achha recipe bata do na, yaar!",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "question"
+  },
+  {
+    "utterance": "Bhai, mujhe scooty lene ka soch raha hoon, lekin EMI ka process kya hota hai? Thoda help kar de.",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "customer_support"
+  },
+  {
+    "utterance": "Indiranagar mein date night ke liye koi achha restaurant bata na yaar.",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "question"
+  },
+  {
+    "utterance": "Bhai, mujhe apna Cult.fit membership cancel karna hai, yeh use nahi kar raha hoon na.",
+    "intent": "remove_item",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "customer_support"
+  },
+  {
+    "utterance": "Yaar, mujhe 30 saal ki age tak financially independent hona hai. Kya tips de sakte ho?",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "question"
+  },
+  {
+    "utterance": "Mere Swiggy order mein ek item nahi aaya, bhai! Kaise hai yeh? Bahut bekar service hai yaar!",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "customer_support"
+  },
+  {
+    "utterance": "Arey bhai, kab pata chalega ki mujhe therapist se milna chahiye? Kabhi kabhi aisa lagta hai ki kuch zyada hi ho raha hai.",
+    "intent": "add_item",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "question"
+  },
+  {
+    "utterance": "Yaar, swimming better hai ya gym jaana achha hai? Kya karna chahiye? Mujhe confuse ho raha hai!",
+    "intent": "add_item",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "question"
+  },
+  {
+    "utterance": "bhai, mujhe kuch life advice chahiye, aage kya karna chahiye? startup ko lekar thoda confused hoon.",
+    "intent": "add_item",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "casual"
+  },
+  {
+    "utterance": "Bhai, holiday ka plan bana raha hoon. China ya Dubai mein se kahan jaana chahiye? Kya tumhe koi suggestions hain?",
+    "intent": "add_item",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "question"
+  },
+  {
+    "utterance": "Bhai, mujhe JEE counselling me kaunsa engineering branch choose karna chahiye? Kya pata kis field me future achha hai.",
+    "intent": "add_item",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "question"
+  },
+  {
+    "utterance": "Mujhe pata nahi kyun mera IRCTC train ticket booking fail ho gaya, bhai. Kabhi kabhi kuch samajh nahi aata yaar.",
+    "intent": "affirm",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "customer_support"
+  },
+  {
+    "utterance": "Yaar, US tourist visa interview ki taiyari kaise karun? Kya kya dhyan dena chahiye?",
+    "intent": "add_item",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "question"
+  },
+  {
+    "utterance": "Bhai, abhi engineering kiya hai aur MBA karoon ya seedha job lo? Kuch samajh nahi aa raha.",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "question"
+  },
+  {
+    "utterance": "Bhai, mera return status check karna hai. Item pick ho gaya hai lekin abhi bhi 'not picked' dikhata hai. Kya karu?",
+    "intent": "set_payment_mode",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "customer_support"
+  },
+  {
+    "utterance": "Mera speaker kyun nahi chal raha yaar? On karne pe kuch nahi ho raha, kya pata kya problem hai.",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "customer_support"
+  },
+  {
+    "utterance": "Bhai, mujhe pehli baar saree pehni hai, thoda help kar na. Kaunsi buy karun aur kaise pehnun?",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "question"
+  },
+  {
+    "utterance": "Yaar, gym nahi gaya last 2 weeks se, bilkul out of shape feel kar raha hoon. Weekend pe kya plan karna chahiye? Thoda workout karna hai na.",
+    "intent": "add_item",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "casual"
+  },
+  {
+    "utterance": "Mujhe AIR India app pe apna account kaise add karna hai, koi idea hai kya?",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "customer_support"
+  },
+  {
+    "utterance": "Bhai, mujhe toh SIP mutual funds invest karna hai, 5K monthly daal sakta hoon. Kya ye sahi hai ya nahi?",
+    "intent": "affirm",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "question"
+  },
+  {
+    "utterance": "Boss, mujhe borderline diabetes hai na, toh kya khana chahiye samajh nahi aa raha hai. Kya pata kuch help mile?",
+    "intent": "add_item",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "question"
+  },
+  {
+    "utterance": "Bhai, maine jo Blinkit pe order diya hai, uska address change karna hai, kaise karu yaar?",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "customer_support"
+  },
+  {
+    "utterance": "Arey bhai, mujhe samajh nahi aa raha ki AI Engineer banna chahiye ya Software Developer? Kya tumhare paas koi advice hai?",
+    "intent": "add_item",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "question"
+  },
+  {
+    "utterance": "Yaar, mera phone ka battery toh itna garam ho raha hai aur puffed bhi ho gaya hai, kya karu? Kuch samajh nahi aa raha.",
+    "intent": "affirm",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "customer_support"
+  },
+  {
+    "utterance": "Bhai, mera Paytm transaction fail ho gaya, samajh nahi aa raha kyun! Koi help kar sakta hai kya?",
+    "intent": "set_payment_mode",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "customer_support"
+  },
+  {
+    "utterance": "Bhai, mujhe life kaafi confusing lag rahi hai abhi, kya karna chahiye? Internship ke saath saath zindagi ke decisions bhi lene hain.",
+    "intent": "add_item",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "casual"
+  },
+  {
+    "utterance": "Bhaisahab, mujhe borderline diabetes hai, kya khana chahiye main? Kuch tips do.",
+    "intent": "add_item",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "question"
+  },
+  {
+    "utterance": "Bhai, mujhe data science ke liye ek achha laptop lena hai, budget 80K ke andar hai. Kya advice doge?",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "question"
+  },
+  {
+    "utterance": "Yaar, mujhe US tourist visa interview ke liye prepare karna hai. Kya kuch tips de sakte ho?",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "question"
+  },
+  {
+    "utterance": "Mera mobile ka battery bahut garam ho raha hai aur puffed bhi ho gaya hai, samajh nahi aa raha kyun ho raha hai. Kya karoon?",
+    "intent": "affirm",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "customer_support"
+  },
+  {
+    "utterance": "Bhai, abhi college se nikal ke kya karna chahiye? Thoda advice de na.",
+    "intent": "add_item",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "casual"
+  },
+  {
+    "utterance": "Bhai, mujhe pehli baar home loan lene ka soch raha hoon. Eligibility ke liye kuch pata hai? Kya karna hoga?",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "question"
+  },
+  {
+    "utterance": "Bhai, engineering ke baad MBA karna sahi hai ya seedha job lagana chahiye?",
+    "intent": "add_item",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "question"
+  },
+  {
+    "utterance": "Bhai, mutton biryani kaise banate hain cooker mein? Thoda simple batana na.",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "question"
+  },
+  {
+    "utterance": "Yaar, mujhe Amazon se order ki delivery kaafi delay ho gaya hai, koi reason hai kya?",
+    "intent": "affirm",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "customer_support"
+  },
+  {
+    "utterance": "Bhai, mujhe samajh nahi aata ki MBA karu ya seedha job join karun engineering ke baad. Kya karna chahiye?",
+    "intent": "add_item",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "question"
+  },
+  {
+    "utterance": "Indiranagar mein date night ke liye koi acha restaurant recommend kar na yaar.",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "question"
+  },
+  {
+    "utterance": "Hey, mujhe apna Cult.fit membership cancel karna hai. Use kiya nahi hai kab se, matlab kuch nahi ho raha hai. Kya karna padega?",
+    "intent": "remove_item",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "customer_support"
+  },
+  {
+    "utterance": "\"Tumhare kaam se mujhe kuch zaroori baatein karni hai, khaas karke tumhara pichla project. Is baar agar improvement nahi dikhata, toh samajh lo...” Yeh email mujhe threatening lag raha hai ya normal?\"",
+    "intent": "set_payment_mode",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "sentiment"
+  },
+  {
+    "utterance": "Bhai, JEE counselling ke liye engineering ka branch choose karna hai, thoda help kar de na.",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "question"
+  },
+  {
+    "utterance": "Mere Amazon ka order aaj tak nahi aaya, delay kyun ho raha hai yaar?",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "customer_support"
+  },
+  {
+    "utterance": "Yaar, maine suna hai movie ka review aisa hai, 'Kahaani 2 is thrilling and full of suspense.' Iska sentiment kya hoga?",
+    "intent": "affirm",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "sentiment"
+  },
+  {
+    "utterance": "Bhai, mujhe long weekend ke liye travel plan karna hai. Goa ya Pondicherry, kya recommend karega? Bas thoda confusion ho raha hai.",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "question"
+  },
+  {
+    "utterance": "Bhai, kal Eid hai na? Kya holiday hoga office mein?",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "question"
+  },
+  {
+    "utterance": "Yaar, mera speaker on nahi ho raha hai. Kya karun? Bas, wedding shoot ke liye chahiye tha.",
+    "intent": "add_item",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "customer_support"
+  },
+  {
+    "utterance": "Bhai, engineering ke baad MBA karun ya seedha job kar loon? Kya sochta hai tu?",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "question"
+  },
+  {
+    "utterance": "Bhai, mujhe 30 ki age tak financially independent hona hai. Kaise shuru karun? Kya tips hai?",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "question"
+  },
+  {
+    "utterance": "Bhai, home loan ke liye eligibility check karne ka kaise pata karoon? Pehli baar kharid raha hoon, thoda tension ho raha hai.",
+    "intent": "add_item",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "question"
+  },
+  {
+    "utterance": "Arey bhai, mujhe 30K ke andar koi accha phone chahiye. Kya recommend karoge?",
+    "intent": "add_item",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "casual"
+  },
+  {
+    "utterance": "Kal office jaana chahiye ya ghar se kaam karun? Kya pata kya sahi hai.",
+    "intent": "add_item",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "casual"
+  },
+  {
+    "utterance": "Bhai, mere Amazon ka order toh abhi tak aaya nahi! Diwali sale ke time pe itna late delivery kyu ho raha hai? Bas ab toh chakkar aa rahe hain.",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "customer_support"
+  },
+  {
+    "utterance": "Mujhe ek kapda order kiya tha, par galat color aaya hai. Kya main isse return kar sakti hoon?",
+    "intent": "remove_item",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "customer_support"
+  },
+  {
+    "utterance": "Bhai, mera Amazon ka order ab tak nahi aaya, festive sale ke dauran ka tha. Diwali ke liye chhote chhote gifts lene the, ab kya karu? Koi idea hai?",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "customer_support"
+  },
+  {
+    "utterance": "Bhai, BookMyShow pe maine ticket book kiya tha, lekin wo pending dikh raha hai. Itna sa issue hai kya?",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "customer_support"
+  },
+  {
+    "utterance": "Yaar, mera Ola driver last minute pe cancel kar diya. Samajh nahi aata, itni badi problem kyun hai? Mujhe toh kaam pe jaana hai jaldi.",
+    "intent": "remove_item",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "customer_support"
+  },
+  {
+    "utterance": "Mera speaker on nahi ho raha hai, bhai. Kya karu?",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "customer_support"
+  },
+  {
+    "utterance": "Mere boyfriend ka message hai: 'Mujhe lagta hai tumhe thoda time dena chahiye.' Kya woh disappointed lag raha hai?",
+    "intent": "add_item",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "sentiment"
+  },
+  {
+    "utterance": "Yaar, maine blinkit se sabzi order ki thi, lekin sabziyaan toh bilkul kharab hain. Ab kya karun?",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "customer_support"
+  },
+  {
+    "utterance": "Mera credit card to aaya nahi yaar, kya karu ab? Mujhe bahut zarurat hai.",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "customer_support"
+  },
+  {
+    "utterance": "Bhai, mujhe QA se ML engineering mein switch karna hai, thoda help kar na?",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "question"
+  },
+  {
+    "utterance": "Bhai, mujhe home loan lene ka soch raha hoon, par eligibility ke bare mein pata nahi hai. Kya yeh first time buyers ke liye tough hai?",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "question"
+  },
+  {
+    "utterance": "Bhai, mujhe pata nahi AI Engineer aur Software Engineer mein se kya best hai, kya tum bata sakte ho? Photography ke saath sath soch raha hoon na career change karne ka.",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "question"
+  },
+  {
+    "utterance": "Bhai, mera Paytm transaction fail ho gaya. Kya karu ab?",
+    "intent": "set_payment_mode",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "customer_support"
+  },
+  {
+    "utterance": "Yaar, kal Eid hai na? Kya holiday hoga kya?",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "question"
+  },
+  {
+    "utterance": "Bhai, mujhe home loan ke liye apply karna hai, par pata nahi eligibility kaise check karna hai. Kahan se shuru karun?",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "question"
+  },
+  {
+    "utterance": "Yaar, mujhe Vodafone pe bill dekha toh data charge zyada aa raha hai, samajh nahi aa raha kyun. Kya karu?",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "customer_support"
+  },
+  {
+    "utterance": "Mere IRCTC ticket booking kyun fail ho gaya? Koi idea hai kya?",
+    "intent": "affirm",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "customer_support"
+  },
+  {
+    "utterance": "Bhai, mujhe ghar kharidna hai par home loan eligibility ke baare mein kuch pata nahi hai. Kya pata sakte ho na?",
+    "intent": "add_item",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "question"
+  },
+  {
+    "utterance": "Yaar, mujhe pehli baar home loan lena hai. Kya eligibility check karne ka koi asan tareeqa hai?",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "question"
+  },
+  {
+    "utterance": "Bhai, swimming kya accha hai ya gym jaana? Kya sochta hai tu?",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "question"
+  },
+  {
+    "utterance": "Yaar, mujhe borderline diabetes hai, kya khana chahiye thoda samajh nahi aa raha.",
+    "intent": "add_item",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "question"
+  },
+  {
+    "utterance": "Mujhe kab pata chalega ki mujhe therapist se milne ki zarurat hai? Matlab, kuch signs hain kya?",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "question"
+  },
+  {
+    "utterance": "Bhai, aaj toh mazay aa gaye! Mujhe promotion mil gaya apne tiffin service mein! Koi party plan karna chahiye kya?",
+    "intent": "add_item",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "casual"
+  },
+  {
+    "utterance": "Yaar, mera Ola driver last minute pe cancel kar diya! Matlab, ab kya karoon? Tiffin delivery bhi delay ho jayegi.",
+    "intent": "remove_item",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "customer_support"
+  },
+  {
+    "utterance": "Mujhe ek scooty kharidni hai, par EMI kaise kaam karta hai? Kya pata kuch jankari do yaar.",
+    "intent": "add_item",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "customer_support"
+  },
+  {
+    "utterance": "Bhai, mujhe kuch achha laptop chahiye data science ke liye, budget 80K tak hai. Kya recommend karoge?",
+    "intent": "add_item",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "question"
+  },
+  {
+    "utterance": "Bhai, mereko yeh samajh nahi aa raha ki MBA karun ya phir engineering ke baad seedha job karun. Tumhare kya thoughts hain?",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "question"
+  },
+  {
+    "utterance": "Yaar, kal Eid hai na? Kya holiday milega mujhe delivery ke liye?",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "question"
+  },
+  {
+    "utterance": "Bhai, mujhe thoda help chahiye. Main QA se ML engineering mein switch karna chahta hoon, kaise karun?",
+    "intent": "add_item",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "question"
+  },
+  {
+    "utterance": "Hey! Kya haal chaal hain? Kab se nahi mile hum log. Bahut kuch badal gaya hoga na?",
+    "intent": "greet",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "casual"
+  },
+  {
+    "utterance": "Yaar, mujhe Vodafone ka bill mila aur wahan pe data charge kuch zyada hi hai. Kya pata nahi kyun aise ho raha hai?",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "customer_support"
+  },
+  {
+    "utterance": "Bhai, mujhe thoda help chahiye home loan ke liye. Main pehli baar ghar lene ka soch raha hoon, eligibility kya hai?",
+    "intent": "add_item",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "question"
+  },
+  {
+    "utterance": "Yaar, aaj toh Zomato ka food bilkul bekar aaya. Kya hai yaar yeh khana? Quality toh bohot kharab hai!",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "customer_support"
+  },
+  {
+    "utterance": "Bhai, mujhe home loan ke liye apply karna hai, lekin mujhe nahi pata eligibility kya hoti hai. Kya tu thoda help karega?",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "question"
+  },
+  {
+    "utterance": "Bhai, mujhe mutton biryani banana hai, par cooker mein kaise banaoonga yeh samajh nahi aa raha. Thoda help kar na.",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "question"
+  },
+  {
+    "utterance": "Indiranagar ke aas paas koi achha restaurant batao date night ke liye.",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "question"
+  },
+  {
+    "utterance": "Bhai, JEE counselling mein kaunsa engineering branch choose karna chahiye? Mujhe ye samajh nahi aa raha hai.",
+    "intent": "add_item",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "question"
+  },
+  {
+    "utterance": "Bhai, mujhe samajh nahi aa raha ki AI Engineer banna better hoga ya Software Engineer? Kya tumhare paas kuch tips hain?",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "question"
+  },
+  {
+    "utterance": "Yaar, mujhe kab pata chalega ki mujhe therapist se milna chahiye? Kabhi kabhi zindagi mein bahut stress hota hai na.",
+    "intent": "add_item",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "question"
+  },
+  {
+    "utterance": "Yaar, mujhe ek dilemma hai. Kya mujhe kisi MNC join karna chahiye ya phir shuruwaat karne wale startup ke saath jaana chahiye? Wedding photography ki duniya ke baad, kya yeh change badiya hoga?",
+    "intent": "add_item",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "question"
+  },
+  {
+    "utterance": "Yaar, swimming zyada achha hai ya gym jaana? Mujhe thoda decision lena hai.",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "question"
+  },
+  {
+    "utterance": "Yaar, mujhe borderline diabetes hai, toh kya khana chahiye? Itna sa help kar de.",
+    "intent": "add_item",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "question"
+  },
+  {
+    "utterance": "Bhai, mujhe 30 ki age tak financially independent hona hai. Kya karu? Thoda help kar na.",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "question"
+  },
+  {
+    "utterance": "Bhai, itna time ho gaya yaar, kaise ho? Kya chal raha hai aajkal?",
+    "intent": "greet",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "casual"
+  },
+  {
+    "utterance": "Bhai, mujhe 30 tak financial independence chahiye. Kya karun? Kahan se shuru karun?",
+    "intent": "add_item",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "question"
+  },
+  {
+    "utterance": "Arre yaar, swimming karna better hai ya gym jaana? Kaunsa zyada fayda dega mujhe?",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "question"
+  },
+  {
+    "utterance": "Arey bhai, maine apna password bhool gaya hoon, mobile pe kaise update karu?",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "customer_support"
+  },
+  {
+    "utterance": "Bhai, mujhe scooty kharidni hai, par EMI ke bare mein nahi pata. Thodi madad kar de.",
+    "intent": "add_item",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "customer_support"
+  },
+  {
+    "utterance": "Mere mobile ki battery bahut garam ho rahi hai aur puffed bhi ho gayi hai, kya karun yaar?",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "customer_support"
+  },
+  {
+    "utterance": "Bhai, mujhe credit card statement pe kuch galat charge dikha raha hai. Kaise dispute karu isse?",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "customer_support"
+  },
+  {
+    "utterance": "Mujhe cooker mein mutton biryani kaise banani hai? Thoda help karo na.",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "question"
+  },
+  {
+    "utterance": "Bhai, mujhe QA se ML engineering me switch karna hai, kya karun? Main abhi 22 ka hoon aur fresh graduate hoon Bangalore se.",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "question"
+  },
+  {
+    "utterance": "Mera mobile ka battery thoda zyada garam ho raha hai aur puffed bhi ho gaya hai. Yeh kya problem hai, samajh nahi aa raha.",
+    "intent": "affirm",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "customer_support"
+  },
+  {
+    "utterance": "arre, dekho yaar, mere colleague ne slack par bola: 'Tumhe pata hai na kaam kitna hai aaj? Seriously, kuch nahi hota hai kya?' Kya lagta hai, woh annoyed hai kya?",
+    "intent": "query_item_price",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "sentiment"
+  },
+  {
+    "utterance": "Yaar, BookMyShow pe maine movie ka ticket book kiya tha, lekin wo pending dikh raha hai. Kya karu ab?",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "customer_support"
+  },
+  {
+    "utterance": "Bhai, mujhe mutton biryani banana hai cooker mein. Recipe bata na, kya pata kuch achha ban jaaye!",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "question"
+  },
+  {
+    "utterance": "Mujhe 30 saal ki age tak financially independent hona hai, kuch tips do yaar. Main toh bas abhi apna tiffin service chala rahi hoon Nagpur mein.",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "question"
+  },
+  {
+    "utterance": "Yaar, mujhe samajh nahi aa raha, swimming karun ya gym join karun? Kya acha option hai?",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "question"
+  },
+  {
+    "utterance": "Yaar, mujhe kab pata chalega ki mujhe therapist ke paas jaana chahiye? Thoda confused hoon.",
+    "intent": "add_item",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "question"
+  },
+  {
+    "utterance": "Bhai, mujhe samajh nahi aa raha ki MNC join karun ya startup. Kya yeh kabhi kabhi risk hai kya?",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "question"
+  },
+  {
+    "utterance": "Yaar, mera IRCTC ticket booking fail ho gaya, kyun hua aisa? Kuch samajh nahi aaya.",
+    "intent": "affirm",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "customer_support"
+  },
+  {
+    "utterance": "Bhai, mujhe ye samajh nahi aa raha ki AI Engineer ka career choose karun ya Software Engineer ka. Kya tumhare paas koi advice hai?",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "question"
+  },
+  {
+    "utterance": "Bhai, mujhe Flipkart par ek return ka refund chahiye, par samajh nahi aa raha kaise milega. Kya karna padega?",
+    "intent": "add_item",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "customer_support"
+  },
+  {
+    "utterance": "Kya yaar, itne dinon baad milne ka mauka mila hai. Kya chal raha hai tumhare saath?",
+    "intent": "greet",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "casual"
+  },
+  {
+    "utterance": "Yaar, mera return status check karna hai. Item pick ho gaya hai par abhi bhi 'not picked' dikhata hai. Kya karun?",
+    "intent": "set_payment_mode",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "customer_support"
+  },
+  {
+    "utterance": "Mujhe apne credit card statement mein ek wrong charge mila hai, usko dispute kaise kar sakti hoon?",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "customer_support"
+  },
+  {
+    "utterance": "Yaar, lunch ke liye kya order karoon? Chahiye toh kuch tasty hona chahiye.",
+    "intent": "add_item",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "casual"
+  },
+  {
+    "utterance": "Bhai, MNC join karoon ya startup? Kya sochta hai?",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "question"
+  },
+  {
+    "utterance": "Bhai, AI Engineer aur Software Engineer mein se kaunsa profession better hai? Main thoda confused hoon, kya pata.",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "question"
+  },
+  {
+    "utterance": "Yaar, home loan ke liye eligibility check karni hai, kyunki main first time buyer hoon. Kya pata, mujhe kya kya chahiye hoga?",
+    "intent": "add_item",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "question"
+  },
+  {
+    "utterance": "Yaar, electricity bill aa gaya, phir se poora amount khud hi dena padega kya? Haan haan, sab log toh baithe hain chill karte.",
+    "intent": "add_item",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "casual"
+  },
+  {
+    "utterance": "Yaar, maine blinkit se vegetables order kiye the par wo sab kuch badh gaye hain. Kya karun ab?",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "customer_support"
+  },
+  {
+    "utterance": "Yaar, mujhe pehli baar SIP mutual funds mein invest karna hai. Agar main har mahine 5K daalun, toh kya ye achha rahega? Thoda guide kar na please.",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "question"
+  },
+  {
+    "utterance": "Arey bhai, mujhe OTP nahi aa raha UPI payment ke liye, bohot dikkat ho rahi hai!",
+    "intent": "set_payment_mode",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "customer_support"
+  },
+  {
+    "utterance": "Yaar, blinkit se vegetables order kiye they aur sab kharab aa gaye! Kya karun ab?",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "customer_support"
+  },
+  {
+    "utterance": "Yaar, mujhe borderline diabetes hai, kya khana chahiye kuch khaas?",
+    "intent": "add_item",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "question"
+  },
+  {
+    "utterance": "Yaar, Blinkit se maine vegetables order kiye the, par wo sab bilkul kharab hain. Kisi kaam ke nahi hain! Kya karu ab?",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "customer_support"
+  },
+  {
+    "utterance": "Mera speaker on nahi ho raha hai, koi idea hai kya karu? Lagta hai battery dead hai na?",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "customer_support"
+  },
+  {
+    "utterance": "Arre, yaar, mujhe QA se ML engineer banne ka soch raha hoon. Kahan se shuru karu? Kya karna padega?",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "question"
+  },
+  {
+    "utterance": "Bhai, maine Blinkit se sabzi order ki thi lekin wo sabziyaan bilkul kharab hain. Kya karun ab?",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "customer_support"
+  },
+  {
+    "utterance": "Yaar, meri credit card statement pe ek wrong charge hai. Kaise dispute karu?",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "customer_support"
+  },
+  {
+    "utterance": "Arre yaar, mujhe samajh nahi aa raha ki swimming karun ya gym jau. Kya karna sahi rahega?",
+    "intent": "help",
+    "source": "DSMJ910/hinglish-instruct-10k",
+    "category": "question"
+  }
+]

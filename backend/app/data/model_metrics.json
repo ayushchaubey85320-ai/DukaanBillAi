@@ -1,0 +1,11 @@
+{
+  "dataset_size": 9495,
+  "train_samples": 8070,
+  "test_samples": 1425,
+  "intents_count": 27,
+  "accuracy": 0.9719,
+  "macro_f1": 0.6481,
+  "weighted_f1": 0.9691,
+  "precision": 0.9682,
+  "recall": 0.9719
+}

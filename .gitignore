@@ -1,0 +1,40 @@
+# Dependencies
+node_modules/
+package-lock.json
+
+# Build Outputs
+dist/
+build/
+.gradle/
+android/app/build/
+frontend/android/app/build/
+frontend/android/.gradle/
+*.apk
+*.aab
+!apk/DukaanAI.apk
+
+# Python Cache & Virtual Environments
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.env
+
+# Database
+*.db
+*.sqlite3
+
+# OS & IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+
+# Android local properties
+local.properties
+.cxx/
