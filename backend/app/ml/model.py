@@ -31,6 +31,27 @@ def predict_intent(text: str) -> Dict[str, Any]:
     if not cleaned:
         return {"intent": "fallback", "confidence": 0.0, "clean_text": ""}
 
+    lower_t = cleaned.lower()
+
+    # Priority 1: High-Precision Business Rule Guards
+    # Remove GST / 0% Tax (e.g. "gst htao", "gst hatao", "remove gst")
+    if any(w in lower_t for w in [
+        "gst htao", "gst hatao", "gst hata do", "gst nikal do", "gst mat lagao", 
+        "gst cancel", "remove gst", "delete gst", "no gst", "without gst", 
+        "zero gst", "bina gst", "tax hatao", "tax hata do", "tax htao", "remove tax", "no tax",
+        "जीएसटी हटाओ", "टैक्स हटाओ", "जीएसटी हटा दो"
+    ]) or (("gst" in lower_t or "tax" in lower_t or "जीएसटी" in lower_t or "टैक्स" in lower_t) and any(w in lower_t for w in ["htao", "hatao", "hata", "nikal", "mat", "bina", "without", "remove", "no", "zero", "हटाओ", "हटा"])):
+        return {"intent": "remove_gst", "confidence": 0.99, "clean_text": cleaned}
+
+    if any(w in lower_t for w in ["switch to hindi", "hindi me bolo", "hindi language", "hindi me baat"]):
+        return {"intent": "switch_language_hindi", "confidence": 0.99, "clean_text": cleaned}
+    if any(w in lower_t for w in ["switch to english", "english me bolo", "talk in english", "english language"]):
+        return {"intent": "switch_language_english", "confidence": 0.99, "clean_text": cleaned}
+    if any(w in lower_t for w in ["start new bill", "naya bill", "clear all", "reset bill"]):
+        return {"intent": "reset_session", "confidence": 0.99, "clean_text": cleaned}
+    if any(w in lower_t for w in ["cancel last item", "pichla wala item hata do", "undo last", "last wala hatao"]):
+        return {"intent": "cancel_last_item", "confidence": 0.99, "clean_text": cleaned}
+
     model = get_or_load_model()
     
     if model is not None:
@@ -46,7 +67,7 @@ def predict_intent(text: str) -> Dict[str, Any]:
                 max_idx = probs.argmax()
                 predicted_intent = classes[max_idx]
                 raw_prob = float(probs[max_idx])
-                # Calibrate: 26 classes has baseline 0.038. Scale raw probability to confidence range
+                # Calibrate: 27 classes has baseline ~0.037. Scale raw probability to confidence range
                 calibrated = min(0.98, max(0.60, round(raw_prob * 2.2, 4)))
                 confidence = calibrated
 
@@ -58,8 +79,7 @@ def predict_intent(text: str) -> Dict[str, Any]:
         except Exception as e:
             print(f"Inference error: {e}")
 
-    # High-precision Rule-based Guard
-    lower_t = cleaned.lower()
+    # Fallback Rules
     
     if any(w in lower_t for w in ["switch to hindi", "hindi me bolo", "hindi language", "hindi me baat"]):
         return {"intent": "switch_language_hindi", "confidence": 0.99, "clean_text": cleaned}
@@ -79,11 +99,20 @@ def predict_intent(text: str) -> Dict[str, Any]:
         return {"intent": "reset_session", "confidence": 0.98, "clean_text": cleaned}
     if any(w in lower_t for w in ["cancel last item", "pichla wala item hata do", "undo last", "last wala hatao"]):
         return {"intent": "cancel_last_item", "confidence": 0.98, "clean_text": cleaned}
+    # Remove GST / 0% Tax (e.g. "gst htao", "gst hatao", "remove gst", "without gst")
+    if any(w in lower_t for w in [
+        "gst htao", "gst hatao", "gst hata do", "gst nikal do", "gst mat lagao", 
+        "gst cancel", "remove gst", "delete gst", "no gst", "without gst", 
+        "zero gst", "bina gst", "tax hatao", "tax hata do", "tax htao", "remove tax", "no tax",
+        "जीएसटी हटाओ", "टैक्स हटाओ", "जीएसटी हटा दो"
+    ]) or (("gst" in lower_t or "tax" in lower_t or "जीएसटी" in lower_t or "टैक्स" in lower_t) and any(w in lower_t for w in ["htao", "hatao", "hata", "nikal", "mat", "bina", "without", "remove", "no", "zero", "हटाओ", "हटा"])):
+        return {"intent": "remove_gst", "confidence": 0.99, "clean_text": cleaned}
+
     if any(w in lower_t for w in ["discount", "percent off", "off kar do", "chhut"]):
         return {"intent": "apply_discount", "confidence": 0.95, "clean_text": cleaned}
-    if any(w in lower_t for w in ["gst", "tax lagao", "tax add"]):
+    if any(w in lower_t for w in ["gst", "tax lagao", "tax add", "जीएसटी"]) and not any(w in lower_t for w in ["htao", "hatao", "hata", "nikal", "mat", "bina", "without", "remove", "no", "zero", "हटाओ", "हटा"]):
         return {"intent": "add_gst", "confidence": 0.95, "clean_text": cleaned}
-    if any(w in lower_t for w in ["remove", "delete", "hata do", "hatao", "nikal do"]):
+    if any(w in lower_t for w in ["remove", "delete", "hata do", "hatao", "htao", "nikal do", "हटाओ"]):
         return {"intent": "remove_item", "confidence": 0.95, "clean_text": cleaned}
     if any(w in lower_t for w in ["customer", "grahak", "phone", "mobile"]):
         return {"intent": "set_customer", "confidence": 0.95, "clean_text": cleaned}

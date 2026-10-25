@@ -253,6 +253,14 @@ def generate_massive_training_dataset(target_size: int = 10000) -> List[Tuple[st
             "grahak ko whatsapp karo", "whatsapp share", "whatsapp par parchi bhej do",
             "message bill to customer", "send on mobile"
         ],
+        "remove_gst": [
+            "gst htao", "gst hatao", "gst hata do", "gst nikal do", "gst mat lagao", "gst cancel",
+            "remove gst", "delete gst", "without gst", "bina gst ka bill", "no gst", "zero gst",
+            "gst zero kar do", "tax hatao", "tax hata do", "tax nikal do", "tax htao",
+            "remove tax", "without tax", "bina tax ke", "tax mat lagao", "tax cancel",
+            "no tax", "0% gst", "zero percent gst", "gst nahi lagana", "bina gst",
+            "gst hataiye", "tax hatayein", "जीएसटी हटाओ", "टैक्स हटा दो", "बिना जीएसटी"
+        ],
         "fallback": [
             "weather kaisa hai", "sing a song", "who is the prime minister",
             "tell me a joke", "cricket score kya hai", "play music", "random gibberish",
@@ -382,18 +390,32 @@ def generate_massive_training_dataset(target_size: int = 10000) -> List[Tuple[st
         t_disc = random.choice(disc_templates).format(pct=pct, amt=amt)
         dataset.append((t_disc, "apply_discount"))
 
-    # 7. Synthesize "add_gst" (500+ samples)
-    gst_slabs = [0, 5, 12, 18, 28]
+    # 7. Synthesize "add_gst" (400+ samples)
+    gst_slabs = [5, 12, 18, 28]
     gst_templates = [
         "add {gst}% gst", "gst {gst}% laga do", "apply {gst} percent tax",
         "{gst}% tax add karo", "gst rate is {gst}%", "include {gst}% gst on bill",
         "tax lagao {gst} percent", "bill me {gst}% tax calculate karo",
         "gst @ {gst}%", "cgst and sgst {gst}%", "bill par {gst}% gst jod do"
     ]
-    for _ in range(400):
+    for _ in range(350):
         g = random.choice(gst_slabs)
         t_gst = random.choice(gst_templates).format(gst=g)
         dataset.append((t_gst, "add_gst"))
+
+    # 7b. Synthesize "remove_gst" (350+ samples)
+    remove_gst_templates = [
+        "gst htao", "gst hatao", "gst hata do", "gst nikal do", "gst mat lagao", "gst cancel karo",
+        "remove gst", "delete gst", "without gst", "bina gst", "bina gst ka bill banao", "no gst",
+        "zero gst", "gst zero kar do", "tax hatao", "tax hata do", "tax nikal do", "tax htao",
+        "remove tax from bill", "without tax please", "bina tax ke bill do", "tax mat lagao",
+        "tax cancel", "no tax on this bill", "0% gst lagao", "zero percent tax", "gst nahi lagana hai",
+        "bhaiya gst htao", "sir gst hata do", "is par gst mat dalo", "bina gst bill",
+        "जीएसटी हटाओ", "टैक्स हटाओ", "जीएसटी हटा दो", "बिना टैक्स के बिल", "टैक्स मत लगाओ"
+    ]
+    for _ in range(350):
+        t_rm_gst = random.choice(remove_gst_templates)
+        dataset.append((t_rm_gst, "remove_gst"))
 
     # 8. Synthesize "set_customer" (500+ samples)
     names = [

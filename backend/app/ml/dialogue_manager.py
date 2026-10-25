@@ -206,6 +206,8 @@ def process_dialogue_turn(session_id: str, text: str) -> Dict[str, Any]:
                         existing["quantity"] += item_data["quantity"]
                         qty_desc = f"{existing['quantity']} {existing['unit']}"
                 else:
+                    if session.gst_override is not None:
+                        item_data["gst_rate"] = session.gst_override
                     session.items.append(item_data)
                     qty_desc = f"{item_data['quantity']} {item_data['unit']}"
 
@@ -314,6 +316,18 @@ def process_dialogue_turn(session_id: str, text: str) -> Dict[str, Any]:
             reply = f"{desc} डिस्काउंट लागू कर दिया गया। अंतिम कुल: ₹{bill['grand_total']:.2f}।"
         else:
             reply = f"Applied {desc} discount. Final Total: ₹{bill['grand_total']:.2f}."
+        return build_turn_response(session, intent, confidence, reply, reply)
+
+    # Remove GST / 0% Tax (e.g. "gst htao", "gst hatao", "remove gst")
+    if intent == "remove_gst":
+        session.gst_override = 0.0
+        for itm in session.items:
+            itm["gst_rate"] = 0.0
+        bill = session.get_bill_summary()
+        if session.language == "hi":
+            reply = f"GST हटा दिया गया (0% टैक्स)। कुल बिल: ₹{bill['grand_total']:.2f}।"
+        else:
+            reply = f"Removed GST (0% tax applied). Grand Total: ₹{bill['grand_total']:.2f}."
         return build_turn_response(session, intent, confidence, reply, reply)
 
     # Add / Override GST

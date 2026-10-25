@@ -260,6 +260,17 @@ class TestBillingAgentScenarios(unittest.TestCase):
         res_repair = process_dialogue_turn(s_id, "rice 5 kg")
         self.assertEqual(res_repair["bill"]["items"][0]["quantity"], 5.0)
 
+    def test_scenario_22_gst_removal(self):
+        """Scenario 22: GST removal 'gst htao' reduces tax to 0 and grand total to net rate"""
+        s_id = "test_s22"
+        res1 = process_dialogue_turn(s_id, "add 2 biscuit 40 each")
+        self.assertGreater(res1["bill"]["total_tax"], 0.0)
+        res_rm = process_dialogue_turn(s_id, "gst htao")
+        self.assertEqual(res_rm["intent"], "remove_gst")
+        self.assertEqual(res_rm["bill"]["total_tax"], 0.0)
+        self.assertEqual(res_rm["bill"]["grand_total"], 80.0)
+        self.assertIn("0%", res_rm["reply"])
+
 def run_all_scenarios_report():
     """Runs all 21 test scenarios and returns a structured JSON summary."""
     suite = unittest.TestLoader().loadTestsFromTestCase(TestBillingAgentScenarios)
