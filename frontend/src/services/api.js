@@ -14,7 +14,7 @@ export function getApiBase() {
                    window.location.protocol === "file:" || 
                    (window.location.hostname === "localhost" && window.location.port !== "5174");
   if (isNative) {
-    return "https://cruel-spoons-drop.loca.lt/api";
+    return "https://dukaanai-live.loca.lt/api";
   }
   // Standard web browser running on local dev server
   return "http://127.0.0.1:8001/api";
@@ -28,7 +28,7 @@ export function setApiBase(url) {
   }
 }
 
-export const DEFAULT_ONLINE_URL = "https://cruel-spoons-drop.loca.lt";
+export const DEFAULT_ONLINE_URL = "https://dukaanai-live.loca.lt";
 export const DEFAULT_LAN_URL = "http://192.168.1.14:8001";
 export const DEFAULT_LOCAL_URL = "http://127.0.0.1:8001";
 

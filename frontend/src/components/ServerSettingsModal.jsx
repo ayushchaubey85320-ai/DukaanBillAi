@@ -122,7 +122,7 @@ export default function ServerSettingsModal({ isOpen, onClose, onServerChanged }
             type="button"
             onClick={() => handleSelectPreset(DEFAULT_ONLINE_URL)}
             className={`w-full text-left p-3.5 rounded-xl border transition flex items-start gap-3 ${
-              currentUrl.includes("cruel-spoons-drop.loca.lt")
+              currentUrl.includes("loca.lt")
                 ? "bg-emerald-950/40 border-emerald-500 text-white"
                 : "bg-gray-800/40 border-gray-700/60 hover:bg-gray-800 text-gray-300"
             }`}
