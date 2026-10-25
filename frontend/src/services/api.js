@@ -50,12 +50,46 @@ export function setApiBase(url) {
   }
 }
 
-// Default fetch helper with tunnel bypass headers
+// Token storage helpers
+export function getStoredToken() {
+  return localStorage.getItem("dukaan_auth_token");
+}
+
+export function setStoredToken(token) {
+  if (token) {
+    localStorage.setItem("dukaan_auth_token", token);
+  } else {
+    localStorage.removeItem("dukaan_auth_token");
+  }
+}
+
+export function getStoredUser() {
+  const u = localStorage.getItem("dukaan_user_profile");
+  try {
+    return u ? JSON.parse(u) : null;
+  } catch {
+    return null;
+  }
+}
+
+export function setStoredUser(user) {
+  if (user) {
+    localStorage.setItem("dukaan_user_profile", JSON.stringify(user));
+  } else {
+    localStorage.removeItem("dukaan_user_profile");
+  }
+}
+
+// Default fetch helper with tunnel bypass headers and Authorization
 async function fetchWithBypass(url, options = {}) {
+  const token = getStoredToken();
   const headers = {
     ...(options.headers || {}),
     "Bypass-Tunnel-Reminder": "true"
   };
+  if (token && !headers["Authorization"]) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
   return fetch(url, { ...options, headers });
 }
 
@@ -176,4 +210,154 @@ export async function getTestScenariosReport() {
   const res = await fetchWithBypass(`${base}/test-scenarios`);
   if (!res.ok) throw new Error("Failed to run scenario tests");
   return await res.json();
+}
+
+// --- Shopkeeper Authentication API ---
+export async function loginUser(phone, password) {
+  const base = getApiBase();
+  const res = await fetchWithBypass(`${base}/auth/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ phone, password })
+  });
+  const data = await res.json();
+  if (!res.ok) {
+    throw new Error(data.detail || "Login failed");
+  }
+  setStoredToken(data.token);
+  setStoredUser(data.user);
+  return data;
+}
+
+export async function registerUser(userData) {
+  const base = getApiBase();
+  const res = await fetchWithBypass(`${base}/auth/register`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(userData)
+  });
+  const data = await res.json();
+  if (!res.ok) {
+    throw new Error(data.detail || "Registration failed");
+  }
+  setStoredToken(data.token);
+  setStoredUser(data.user);
+  return data;
+}
+
+export async function getCurrentUser() {
+  const token = getStoredToken();
+  if (!token) return null;
+  const base = getApiBase();
+  try {
+    const res = await fetchWithBypass(`${base}/auth/me`);
+    if (!res.ok) {
+      if (res.status === 401) {
+        logoutUser();
+      }
+      return null;
+    }
+    const user = await res.json();
+    setStoredUser(user);
+    return user;
+  } catch {
+    return getStoredUser();
+  }
+}
+
+export function logoutUser() {
+  localStorage.removeItem("dukaan_auth_token");
+  localStorage.removeItem("dukaan_user_profile");
+  localStorage.removeItem("dukaan_admin_backup_token");
+  localStorage.removeItem("dukaan_admin_backup_user");
+}
+
+// --- Super Admin Private API ---
+export async function getAdminMetrics() {
+  const base = getApiBase();
+  const res = await fetchWithBypass(`${base}/admin/metrics`);
+  if (!res.ok) {
+    const err = await res.json();
+    throw new Error(err.detail || "Failed to load admin metrics");
+  }
+  return await res.json();
+}
+
+export async function getAdminShopkeepers() {
+  const base = getApiBase();
+  const res = await fetchWithBypass(`${base}/admin/shopkeepers`);
+  if (!res.ok) {
+    const err = await res.json();
+    throw new Error(err.detail || "Failed to load shopkeepers");
+  }
+  return await res.json();
+}
+
+export async function getShopkeeperBills(userId) {
+  const base = getApiBase();
+  const res = await fetchWithBypass(`${base}/admin/shopkeepers/${userId}/bills`);
+  if (!res.ok) {
+    const err = await res.json();
+    throw new Error(err.detail || "Failed to load shopkeeper bills");
+  }
+  return await res.json();
+}
+
+export async function toggleShopkeeperStatus(userId, isActive) {
+  const base = getApiBase();
+  const res = await fetchWithBypass(`${base}/admin/shopkeepers/${userId}/toggle`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ is_active: isActive })
+  });
+  if (!res.ok) {
+    const err = await res.json();
+    throw new Error(err.detail || "Failed to update status");
+  }
+  return await res.json();
+}
+
+export async function impersonateShopkeeper(userId) {
+  const base = getApiBase();
+  // Backup admin token so admin can exit impersonation anytime
+  const currentToken = getStoredToken();
+  const currentUser = getStoredUser();
+  if (currentUser && currentUser.role === "super_admin") {
+    localStorage.setItem("dukaan_admin_backup_token", currentToken);
+    localStorage.setItem("dukaan_admin_backup_user", JSON.stringify(currentUser));
+  }
+
+  const res = await fetchWithBypass(`${base}/admin/impersonate/${userId}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" }
+  });
+  const data = await res.json();
+  if (!res.ok) {
+    throw new Error(data.detail || "Impersonation failed");
+  }
+
+  setStoredToken(data.impersonation_token);
+  setStoredUser({
+    ...data.target_user,
+    is_impersonated: true
+  });
+  return data;
+}
+
+export function exitImpersonation() {
+  const backupToken = localStorage.getItem("dukaan_admin_backup_token");
+  const backupUser = localStorage.getItem("dukaan_admin_backup_user");
+  if (backupToken && backupUser) {
+    localStorage.setItem("dukaan_auth_token", backupToken);
+    localStorage.setItem("dukaan_user_profile", backupUser);
+    localStorage.removeItem("dukaan_admin_backup_token");
+    localStorage.removeItem("dukaan_admin_backup_user");
+    return JSON.parse(backupUser);
+  }
+  logoutUser();
+  return null;
+}
+
+export function isImpersonating() {
+  return Boolean(localStorage.getItem("dukaan_admin_backup_token"));
 }

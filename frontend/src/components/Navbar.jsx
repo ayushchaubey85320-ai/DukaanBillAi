@@ -1,16 +1,23 @@
 import React from "react";
-import { Store, Languages, History, CheckCircle2, Settings, PlusCircle, Smartphone, Globe } from "lucide-react";
+import { 
+  Store, Languages, History, CheckCircle2, Settings, PlusCircle, 
+  Smartphone, Globe, Shield, User, LogIn, LogOut 
+} from "lucide-react";
 import { getApiBase } from "../services/api";
 
 export default function Navbar({
   shopInfo,
   language,
+  currentUser,
   onToggleLanguage,
   onOpenSettings,
   onOpenServerSettings,
   onOpenHistory,
   onOpenTests,
-  onResetBill
+  onResetBill,
+  onOpenAuth,
+  onOpenAdmin,
+  onLogout
 }) {
   return (
     <header className="header-bar">
@@ -38,7 +45,77 @@ export default function Navbar({
         </div>
       </div>
 
-      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", justifyContent: "flex-end" }}>
+        {/* Super Admin Master Portal Button (Visible for Super Admin) */}
+        {currentUser?.role === "super_admin" && (
+          <button
+            onClick={onOpenAdmin}
+            style={{
+              padding: "6px 12px",
+              fontSize: "0.82rem",
+              background: "linear-gradient(135deg, #f59e0b, #d97706)",
+              color: "#1e1e1e",
+              fontWeight: 800,
+              border: "none",
+              borderRadius: 8,
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+              boxShadow: "0 2px 10px rgba(245, 158, 11, 0.4)"
+            }}
+            title="Open Super Admin Master Portal"
+          >
+            <Shield size={15} />
+            <span>Super Admin</span>
+          </button>
+        )}
+
+        {/* User Account / Login Button */}
+        {currentUser ? (
+          <div style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 6,
+            background: "rgba(255, 255, 255, 0.06)",
+            border: "1px solid rgba(255, 255, 255, 0.12)",
+            borderRadius: 8,
+            padding: "4px 8px"
+          }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 5, fontSize: "0.78rem", color: "#e2e8f0" }}>
+              <User size={13} style={{ color: "#34d399" }} />
+              <span style={{ fontWeight: 600, maxWidth: 100, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                {currentUser.shop_name || currentUser.full_name}
+              </span>
+            </div>
+            <button
+              onClick={onLogout}
+              style={{
+                background: "transparent",
+                border: "none",
+                color: "#94a3b8",
+                cursor: "pointer",
+                padding: "2px 4px",
+                display: "flex",
+                alignItems: "center"
+              }}
+              title="Logout"
+            >
+              <LogOut size={13} />
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={onOpenAuth}
+            className="btn-secondary"
+            style={{ padding: "6px 12px", fontSize: "0.82rem", color: "#34d399", borderColor: "rgba(16, 185, 129, 0.3)" }}
+            title="Login or Register Shopkeeper Account"
+          >
+            <LogIn size={15} />
+            <span>Login / Register</span>
+          </button>
+        )}
+
         {/* Language Toggle */}
         <button
           onClick={onToggleLanguage}
@@ -69,7 +146,7 @@ export default function Navbar({
           title="Open Automated 21-Scenario Test Matrix"
         >
           <CheckCircle2 size={15} style={{ color: "var(--success)" }} />
-          <span style={{ display: "none", sm: "inline" }}>21 Tests</span>
+          <span style={{ display: "none", sm: "inline" }}>Tests</span>
         </button>
 
         {/* Past Bills History */}

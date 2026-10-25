@@ -13,6 +13,11 @@ frontend/android/.gradle/
 *.aab
 !apk/DukaanAI.apk
 
+# Private Super Admin App (Owner Only - Not Open Source)
+mobile_admin_app/
+super_admin_app/
+*.private.*
+
 # Python Cache & Virtual Environments
 __pycache__/
 *.py[cod]

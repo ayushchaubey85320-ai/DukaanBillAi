@@ -9,7 +9,12 @@ import OnboardingModal from "./components/OnboardingModal";
 import BillHistory from "./components/BillHistory";
 import TestMatrixRunner from "./components/TestMatrixRunner";
 import ServerSettingsModal from "./components/ServerSettingsModal";
-import { sendChatMessage, getCurrentBill, getShopProfile } from "./services/api";
+import AuthModal from "./components/AuthModal";
+import SuperAdminPortal from "./components/SuperAdminPortal";
+import { 
+  sendChatMessage, getCurrentBill, getShopProfile,
+  getCurrentUser, logoutUser, isImpersonating, exitImpersonation
+} from "./services/api";
 import { speechService } from "./services/speech";
 
 export default function App() {
@@ -17,6 +22,9 @@ export default function App() {
   const [language, setLanguage] = useState("en"); // "en" or "hi"
   const [mobileTab, setMobileTab] = useState("chat"); // "chat" or "receipt"
   const [isOfflineMode, setIsOfflineMode] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [impersonating, setImpersonating] = useState(() => isImpersonating());
+
   const [shopInfo, setShopInfo] = useState({
     name: "Apna Super Store",
     type: "kirana",
@@ -28,7 +36,7 @@ export default function App() {
 
   const [bill, setBill] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [activeModal, setActiveModal] = useState(null); // "invoice" | "settings" | "server" | "history" | "tests" | null
+  const [activeModal, setActiveModal] = useState(null); // "invoice" | "settings" | "server" | "history" | "tests" | "auth" | "admin" | null
 
   const [messages, setMessages] = useState([
     {
@@ -40,8 +48,17 @@ export default function App() {
     }
   ]);
 
-  // Load initial shop profile and bill state
+  // Load initial shop profile, bill state, and authenticated user
   useEffect(() => {
+    getCurrentUser()
+      .then(user => {
+        if (user) {
+          setCurrentUser(user);
+          setImpersonating(isImpersonating());
+        }
+      })
+      .catch(() => {});
+
     getShopProfile()
       .then(res => {
         if (res) setShopInfo(res);
@@ -54,6 +71,32 @@ export default function App() {
       })
       .catch(err => console.warn("Could not fetch initial bill:", err));
   }, [sessionId]);
+
+  const handleAuthSuccess = (user) => {
+    setCurrentUser(user);
+    setImpersonating(isImpersonating());
+    if (user.role === "super_admin") {
+      setActiveModal("admin");
+    } else {
+      getShopProfile().then(res => res && setShopInfo(res)).catch(() => {});
+      getCurrentBill(sessionId).then(res => res && setBill(res)).catch(() => {});
+    }
+  };
+
+  const handleLogout = () => {
+    logoutUser();
+    setCurrentUser(null);
+    setImpersonating(false);
+    getShopProfile().then(res => res && setShopInfo(res)).catch(() => {});
+  };
+
+  const handleExitImpersonation = () => {
+    const adminUser = exitImpersonation();
+    setCurrentUser(adminUser);
+    setImpersonating(false);
+    setActiveModal("admin");
+    getShopProfile().then(res => res && setShopInfo(res)).catch(() => {});
+  };
 
   const handleSendMessage = async (userText) => {
     if (!userText.trim() || isProcessing) return;
@@ -144,16 +187,53 @@ export default function App() {
 
   return (
     <div className="app-wrapper">
+      {/* Super Admin Impersonation Top Banner */}
+      {impersonating && (
+        <div style={{
+          background: "linear-gradient(90deg, #9a3412, #c2410c, #ea580c)",
+          color: "#fff",
+          padding: "8px 16px",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          fontSize: "0.82rem",
+          fontWeight: 700,
+          boxShadow: "0 2px 10px rgba(0,0,0,0.3)"
+        }}>
+          <span>👑 <strong>SUPER ADMIN IMPERSONATION:</strong> Managing Store <u>{currentUser?.shop_name || "Store"}</u> ({currentUser?.phone}). Actions reflect in live data.</span>
+          <button
+            onClick={handleExitImpersonation}
+            style={{
+              background: "#fff",
+              color: "#c2410c",
+              border: "none",
+              borderRadius: 6,
+              padding: "4px 12px",
+              fontWeight: 800,
+              fontSize: "0.78rem",
+              cursor: "pointer",
+              boxShadow: "0 2px 6px rgba(0,0,0,0.2)"
+            }}
+          >
+            Exit & Return to Super Admin Portal ➔
+          </button>
+        </div>
+      )}
+
       {/* Top Navbar */}
       <Navbar
         shopInfo={shopInfo}
         language={language}
+        currentUser={currentUser}
         onToggleLanguage={handleToggleLanguage}
         onOpenSettings={() => setActiveModal("settings")}
         onOpenServerSettings={() => setActiveModal("server")}
         onOpenHistory={() => setActiveModal("history")}
         onOpenTests={() => setActiveModal("tests")}
         onResetBill={handleResetBill}
+        onOpenAuth={() => setActiveModal("auth")}
+        onOpenAdmin={() => setActiveModal("admin")}
+        onLogout={handleLogout}
       />
 
       {/* Offline Alert Banner */}
@@ -230,6 +310,23 @@ export default function App() {
       </main>
 
       {/* Modals */}
+      {activeModal === "auth" && (
+        <AuthModal
+          isOpen={true}
+          onClose={() => setActiveModal(null)}
+          onAuthSuccess={handleAuthSuccess}
+        />
+      )}
+
+      {activeModal === "admin" && (
+        <SuperAdminPortal
+          onClose={() => setActiveModal(null)}
+          onImpersonateSuccess={(targetUser) => {
+            handleAuthSuccess(targetUser);
+          }}
+        />
+      )}
+
       {activeModal === "invoice" && (
         <BillModal
           bill={bill}
