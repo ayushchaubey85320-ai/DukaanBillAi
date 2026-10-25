@@ -88,18 +88,94 @@ def extract_customer_info(text: str) -> Dict[str, Optional[str]]:
     return {"customer_name": name, "phone": phone}
 
 def extract_gst_rate(text: str) -> Optional[float]:
-    """Extracts requested GST rate percentage like '12% GST' or 'GST 18%'."""
-    m = re.search(r'(?:gst|tax)\s*(?:@|lagao|add)?\s*([0-9]+(?:\.[0-9]+)?)\s*%', text, re.IGNORECASE)
-    if not m:
-        m = re.search(r'([0-9]+(?:\.[0-9]+)?)\s*%\s*(?:gst|tax)', text, re.IGNORECASE)
-    if not m:
-        m = re.search(r'(?:gst|tax)\s*([0-9]+(?:\.[0-9]+)?)', text, re.IGNORECASE)
+    """Extracts requested GST rate percentage like '12% GST', 'GST 18%', 'gst lgao 50%', 'tax lagao 18%'."""
+    # 1. Any number followed by % or percent or pratishat
+    m = re.search(r'([0-9]+(?:\.[0-9]+)?)\s*(?:%|percent|pratishat|प्रतिशत)', text, re.IGNORECASE)
     if m:
         try:
             return float(m.group(1))
         except ValueError:
             pass
+    # 2. gst/tax followed by words then number: "gst @ 18", "gst rate 18", "tax 18", "gst lgao 18"
+    m2 = re.search(r'(?:gst|tax|जीएसटी|टैक्स)\s*(?:@|rate|rate is|is|lagao|lgao|karo|do|add|me)?\s*([0-9]+(?:\.[0-9]+)?)', text, re.IGNORECASE)
+    if m2:
+        try:
+            return float(m2.group(1))
+        except ValueError:
+            pass
     return None
+
+def extract_rate_change(text: str, existing_items: List[Dict[str, Any]] = None) -> Dict[str, Any]:
+    """
+    Extracts the target item and new rate from utterances such as:
+    - 'peti tile rate change krdo 20 rupya prati'
+    - 'rice ka rate 20 rupy prati kilo hai'
+    - 'tile rate 25 kar do'
+    - 'rate change karo 30 rs'
+    - 'change rate to 40'
+    """
+    clean = normalize_devanagari_digits(text).strip()
+    rate = parse_currency_amount(clean)
+    
+    # If not found via currency, search for numbers after rate/price/bhav keywords
+    if rate is None or rate == 0.0:
+        m = re.search(r'(?:rate|bhav|daam|price|रेट|भाव|दर|दाम)\s*(?:change\s*krdo|change\s*karo|change|badlo|badal\s*do|to|hai|is|=|:)?\s*([0-9]+(?:\.[0-9]+)?)', clean, re.IGNORECASE)
+        if m:
+            try:
+                rate = float(m.group(1))
+            except ValueError:
+                pass
+                
+    # If still not found, check any number in the text
+    if rate is None or rate == 0.0:
+        tokens = clean.split()
+        for t in reversed(tokens):
+            v = parse_number_value(t)
+            if v is not None:
+                rate = v
+                break
+                
+    if rate is None:
+        rate = 0.0
+
+    matched_name = None
+    clean_lower = clean.lower()
+    
+    # Match against existing items in current session
+    if existing_items:
+        # 1. Exact or partial match on item names in bill
+        for itm in existing_items:
+            itm_name = itm.get("name", "").lower()
+            if itm_name and (itm_name in clean_lower or any(tok in clean_lower for tok in itm_name.split() if len(tok) > 2)):
+                matched_name = itm.get("name")
+                break
+                
+        # 2. If no name matched but bill has items, default to the last added item
+        if not matched_name and len(existing_items) > 0:
+            matched_name = existing_items[-1].get("name")
+
+    # If still no matched name, try matching HSN DB
+    if not matched_name:
+        for k in HSN_DATABASE.keys():
+            if re.search(r'\b' + re.escape(k) + r'\b', clean_lower):
+                matched_name = k.capitalize()
+                break
+
+    if not matched_name:
+        # Fallback noun extraction
+        stop_words = {
+            "rate", "change", "krdo", "kardo", "karo", "kar", "do", "badlo", "badal", "hai", "is",
+            "ka", "ki", "ke", "ko", "se", "to", "rupees", "rupay", "rupy", "rupya", "rupye", "rs",
+            "prati", "per", "kilo", "kg", "peti", "each", "bhav", "daam", "price", "wali", "wala"
+        }
+        cand_tokens = [w for w in clean.split() if w.lower() not in stop_words and parse_number_value(w) is None]
+        if cand_tokens:
+            matched_name = " ".join(cand_tokens).capitalize()
+
+    return {
+        "item_name": matched_name or "Item",
+        "new_rate": rate
+    }
 
 def extract_discount(text: str) -> Dict[str, Optional[float]]:
     """Extracts discount percent or flat amount from text."""
@@ -181,10 +257,10 @@ def extract_single_item(text: str) -> Dict[str, Any]:
         r_idx, r_val = numbers[1]
         qty = q_val
         qty_indices.add(q_idx)
-        # Unit after quantity: e.g. "5 kilo aalu", "3 packet biscuit"
+        # Unit after quantity: e.g. "5 kilo aalu", "3 packet biscuit", "20 peti tile"
         if q_idx + 1 < len(tokens):
             cand_unit = normalize_unit(tokens[q_idx + 1])
-            if cand_unit != tokens[q_idx + 1].lower() or tokens[q_idx + 1].lower() in ["kg", "g", "gm", "litre", "ltr", "pkt", "pc", "pcs", "packet", "strip", "box", "nag", "kilo"]:
+            if cand_unit != tokens[q_idx + 1].lower() or tokens[q_idx + 1].lower() in ["kg", "g", "gm", "litre", "ltr", "pkt", "pc", "pcs", "packet", "strip", "box", "nag", "kilo", "peti", "dabba", "crate", "carton"]:
                 unit = cand_unit
                 qty_indices.add(q_idx + 1)
         # Rate assignment if not already found or fallback to second number
@@ -197,7 +273,7 @@ def extract_single_item(text: str) -> Dict[str, Any]:
     elif len(numbers) == 1:
         n_idx, n_val = numbers[0]
         # Check if this single number is price (e.g., preceded by rate or followed by rs)
-        is_price_token = any(w in clean.lower() for w in ['rs', 'rupee', 'rupay', 'rupya', 'each', 'rate', 'bhav']) and n_idx >= len(tokens) - 2
+        is_price_token = any(w in clean.lower() for w in ['rs', 'rupee', 'rupay', 'rupy', 'rupya', 'each', 'rate', 'bhav', 'daam']) and n_idx >= len(tokens) - 2
         if is_price_token:
             rate = n_val
             rate_indices.add(n_idx)
@@ -206,7 +282,7 @@ def extract_single_item(text: str) -> Dict[str, Any]:
             qty_indices.add(n_idx)
             if n_idx + 1 < len(tokens):
                 cand_unit = normalize_unit(tokens[n_idx + 1])
-                if cand_unit != tokens[n_idx + 1].lower() or tokens[n_idx + 1].lower() in ["kg", "g", "gm", "litre", "ltr", "pkt", "pc", "pcs", "packet", "strip", "box", "nag", "kilo"]:
+                if cand_unit != tokens[n_idx + 1].lower() or tokens[n_idx + 1].lower() in ["kg", "g", "gm", "litre", "ltr", "pkt", "pc", "pcs", "packet", "strip", "box", "nag", "kilo", "peti", "dabba", "crate", "carton"]:
                     unit = cand_unit
                     qty_indices.add(n_idx + 1)
 
@@ -222,9 +298,10 @@ def extract_single_item(text: str) -> Dict[str, Any]:
         # Fallback: remove stop words, rate tokens, and numbers
         stop_words = {
             "add", "jodo", "dalo", "plus", "kar", "do", "karo", "item", "at", "rate", "for", "ka", "ki",
-            "ke", "rupees", "rupay", "rupya", "rupye", "rupiya", "rs", "inr", "each", "per", "prati", "please",
+            "ke", "rupees", "rupay", "rupy", "rupya", "rupye", "rupiya", "rs", "inr", "each", "per", "prati", "please",
             "bhi", "aur", "and", "ek", "kilo", "kg", "packet", "pcs", "piece", "gm", "gram", "litre",
-            "रुपये", "रुपया", "पैसे", "प्रति", "भाव", "दर", "वाला", "wali"
+            "peti", "dabba", "box", "crate", "carton", "change", "krdo", "kardo", "badlo", "badal", "hai", "is", "ko", "bhav", "daam", "price",
+            "रुपये", "रुपया", "पैसे", "प्रति", "भाव", "दर", "दाम", "वाला", "wali"
         }
         item_words = []
         for i, t in enumerate(tokens):

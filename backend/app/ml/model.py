@@ -41,14 +41,26 @@ def predict_intent(text: str) -> Dict[str, Any]:
        re.search(r'\b(?:nahi|nhi|not|mat)\s+[A-Za-z\u0900-\u097F]+[,\s]+[A-Za-z\u0900-\u097F]+', lower_t):
         return {"intent": "set_customer", "confidence": 0.99, "clean_text": cleaned}
 
-    # Remove GST / 0% Tax (e.g. "gst htao", "gst hatao", "remove gst")
-    if any(w in lower_t for w in [
-        "gst htao", "gst hatao", "gst hata do", "gst nikal do", "gst mat lagao", 
-        "gst cancel", "remove gst", "delete gst", "no gst", "without gst", 
-        "zero gst", "bina gst", "tax hatao", "tax hata do", "tax htao", "remove tax", "no tax",
-        "जीएसटी हटाओ", "टैक्स हटाओ", "जीएसटी हटा दो"
-    ]) or (("gst" in lower_t or "tax" in lower_t or "जीएसटी" in lower_t or "टैक्स" in lower_t) and any(w in lower_t for w in ["htao", "hatao", "hata", "nikal", "mat", "bina", "without", "remove", "no", "zero", "हटाओ", "हटा"])):
+    # Rate / Price Change / Modification
+    # e.g. "peti tile rate change krdo 20 rupya prati", "rice ka rate 20 rupy prati kilo hai", "rate 25 kar do"
+    if any(w in lower_t for w in ["rate change", "price change", "bhav change", "daam change", "rate badlo", "rate badal"]) or \
+       re.search(r'\b(?:rate|bhav|daam|price|रेट|भाव|दर|दाम)\s+.*(?:hai|krdo|karo|kar do|kardena|change|badlo|badal|hoga)', lower_t) or \
+       re.search(r'\b[A-Za-z\u0900-\u097F]+\s+ka\s+(?:rate|bhav|daam|price)\s+[0-9]+', lower_t) or \
+       re.search(r'\b(?:change|update)\s+.*(?:rate|price|bhav|daam)', lower_t):
+        return {"intent": "change_rate", "confidence": 0.99, "clean_text": cleaned}
+
+    # GST Handling: Remove GST vs Add GST
+    has_gst_word = ("gst" in lower_t or "tax" in lower_t or "जीएसटी" in lower_t or "टैक्स" in lower_t)
+    has_removal_word = any(w in lower_t for w in ["htao", "hatao", "hata", "nikal", "mat", "bina", "without", "remove", "delete", "cancel", "zero", "हटाओ", "हटा"])
+    has_zero_pct = bool(re.search(r'\b0(?:\.0)?\s*%', lower_t) or "zero gst" in lower_t or "0 percent" in lower_t)
+    has_positive_pct = bool(re.search(r'\b[1-9][0-9]*(?:\.[0-9]+)?\s*%', lower_t))
+    has_add_word = any(w in lower_t for w in ["lgao", "lagao", "laga", "add", "jodo", "apply", "include", "dalo", "daalo", "rakho", "calculate", "कैलकुलेट", "लगाओ", "जोड़ो"])
+
+    if has_gst_word and (has_removal_word or has_zero_pct) and not has_positive_pct:
         return {"intent": "remove_gst", "confidence": 0.99, "clean_text": cleaned}
+
+    if has_gst_word and (has_positive_pct or has_add_word):
+        return {"intent": "add_gst", "confidence": 0.99, "clean_text": cleaned}
 
     if any(w in lower_t for w in ["switch to hindi", "hindi me bolo", "hindi language", "hindi me baat"]):
         return {"intent": "switch_language_hindi", "confidence": 0.99, "clean_text": cleaned}
@@ -82,6 +94,21 @@ def predict_intent(text: str) -> Dict[str, Any]:
             if predicted_intent == "set_shop_name" and any(w in lower_t for w in ["customer", "grahak", "client"]):
                 predicted_intent = "set_customer"
                 confidence = 0.99
+
+            # Guard: If model misclassified add_gst as remove_gst when positive percent or add word is present
+            if predicted_intent == "remove_gst" and (has_positive_pct or has_add_word):
+                predicted_intent = "add_gst"
+                confidence = 0.99
+
+            # Guard: If model misclassified change_rate as query_item_price or add_item
+            if predicted_intent in ["query_item_price", "add_item"] and ("rate" in lower_t or "bhav" in lower_t or "daam" in lower_t) and re.search(r'\b[0-9]+', lower_t) and any(w in lower_t for w in ["change", "krdo", "karo", "badlo", "hai"]):
+                predicted_intent = "change_rate"
+                confidence = 0.99
+
+            # Guard: If model misclassified an item addition without any rate-change keyword as change_rate
+            if predicted_intent == "change_rate" and not any(w in lower_t for w in ["rate", "bhav", "daam", "price", "badlo", "change", "रेट", "भाव", "दर", "दाम"]):
+                predicted_intent = "add_item"
+                confidence = 0.90
 
             return {
                 "intent": predicted_intent,

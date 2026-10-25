@@ -391,17 +391,43 @@ def generate_massive_training_dataset(target_size: int = 10000) -> List[Tuple[st
         dataset.append((t_disc, "apply_discount"))
 
     # 7. Synthesize "add_gst" (400+ samples)
-    gst_slabs = [5, 12, 18, 28]
+    gst_slabs = [5, 12, 18, 28, 50]
     gst_templates = [
         "add {gst}% gst", "gst {gst}% laga do", "apply {gst} percent tax",
         "{gst}% tax add karo", "gst rate is {gst}%", "include {gst}% gst on bill",
         "tax lagao {gst} percent", "bill me {gst}% tax calculate karo",
-        "gst @ {gst}%", "cgst and sgst {gst}%", "bill par {gst}% gst jod do"
+        "gst @ {gst}%", "cgst and sgst {gst}%", "bill par {gst}% gst jod do",
+        "gst lgao {gst}%", "gst {gst}% lgao", "tax lgao {gst}%", "{gst}% gst lgao",
+        "gst lgao {gst} percent", "{gst}% tax lgao", "ispar gst lgao {gst}%"
     ]
-    for _ in range(350):
+    for _ in range(400):
         g = random.choice(gst_slabs)
         t_gst = random.choice(gst_templates).format(gst=g)
         dataset.append((t_gst, "add_gst"))
+
+    # 7a. Synthesize "change_rate" (400+ samples)
+    sample_items = ["rice", "chawal", "peti tile", "tile", "sugar", "chini", "atta", "oil", "milk", "biscuit", "aalu"]
+    rate_templates = [
+        "{item} rate change krdo {price} rupya prati",
+        "{item} ka rate {price} rupy prati kilo hai",
+        "{item} ka rate {price} rupya hai",
+        "{item} ka rate {price} kar do",
+        "{item} rate {price} kar do",
+        "{item} rate change karo {price} rs",
+        "rate change krdo {price} rupya",
+        "rate {price} rupya kar do",
+        "change rate of {item} to {price}",
+        "update {item} rate to {price}",
+        "{item} ka bhav {price} rupya kilo",
+        "{item} ka daam {price} kar do",
+        "{item} rate badal do {price} rupees",
+        "rate badlo {price} rs"
+    ]
+    for _ in range(400):
+        itm = random.choice(sample_items)
+        prc = random.choice([15, 20, 25, 30, 40, 50, 60, 80, 100, 250, 500])
+        t_rate = random.choice(rate_templates).format(item=itm, price=prc)
+        dataset.append((t_rate, "change_rate"))
 
     # 7b. Synthesize "remove_gst" (350+ samples)
     remove_gst_templates = [

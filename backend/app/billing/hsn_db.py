@@ -78,6 +78,8 @@ HSN_DATABASE: Dict[str, Dict[str, Any]] = {
     "dupatta": {"hsn": "6214", "rate": 5.0, "category": "Garments", "description": "Scarf / Dupatta"},
 
     # Electronics & Hardware
+    "tile": {"hsn": "6907", "rate": 18.0, "category": "Hardware / Flooring", "description": "Ceramic / Vitrified Tiles"},
+    "tiles": {"hsn": "6907", "rate": 18.0, "category": "Hardware / Flooring", "description": "Ceramic / Vitrified Tiles"},
     "charger": {"hsn": "8504", "rate": 18.0, "category": "Electronics", "description": "Mobile Phone Charger"},
     "cable": {"hsn": "8544", "rate": 18.0, "category": "Electronics", "description": "USB / Data Cable"},
     "earphones": {"hsn": "8518", "rate": 18.0, "category": "Electronics", "description": "Headphones / Earphones"},

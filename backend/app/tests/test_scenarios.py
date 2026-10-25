@@ -346,6 +346,42 @@ class TestBillingAgentScenarios(unittest.TestCase):
         r = process_dialogue_turn(s_id, "Print invoice")
         self.assertEqual(r["intent"], "finalize_bill")
 
+    def test_scenario_24_rate_change_and_gst_variations(self):
+        """Scenario 24: Rate change ('peti tile rate change krdo 20', 'rice ka rate 20') and 'gst lgao 50%'"""
+        # Part 1: Peti tile rate change
+        s1 = "test_s24_part1"
+        r1 = process_dialogue_turn(s1, "20 peti tile 510 rupya")
+        self.assertEqual(r1["intent"], "add_item")
+        self.assertEqual(r1["bill"]["items"][0]["quantity"], 20.0)
+        self.assertEqual(r1["bill"]["items"][0]["rate"], 510.0)
+
+        r2 = process_dialogue_turn(s1, "gst htao")
+        self.assertEqual(r2["intent"], "remove_gst")
+        self.assertEqual(r2["bill"]["total_tax"], 0.0)
+        self.assertEqual(r2["bill"]["grand_total"], 10200.0)
+
+        r3 = process_dialogue_turn(s1, "peti tile rate change krdo 20 rupya prati")
+        self.assertEqual(r3["intent"], "change_rate")
+        self.assertEqual(r3["bill"]["items"][0]["rate"], 20.0)
+        self.assertEqual(r3["bill"]["grand_total"], 400.0)
+
+        # Part 2: Rice rate change and gst lgao 50%
+        s2 = "test_s24_part2"
+        r4 = process_dialogue_turn(s2, "2 kg rice at 60 rs")
+        self.assertEqual(r4["intent"], "add_item")
+        self.assertEqual(r4["bill"]["items"][0]["quantity"], 2.0)
+        self.assertEqual(r4["bill"]["items"][0]["rate"], 60.0)
+
+        r5 = process_dialogue_turn(s2, "rice ka rate 20 rupy prati kilo hai")
+        self.assertEqual(r5["intent"], "change_rate")
+        self.assertEqual(r5["bill"]["items"][0]["rate"], 20.0)
+        self.assertEqual(r5["bill"]["grand_total"], 42.0) # 2 * 20 = 40 + 5% GST = 42
+
+        r6 = process_dialogue_turn(s2, "gst lgao 50%")
+        self.assertEqual(r6["intent"], "add_gst")
+        self.assertEqual(r6["bill"]["items"][0]["gst_rate"], 50.0)
+        self.assertEqual(r6["bill"]["grand_total"], 60.0) # 2 * 20 = 40 + 50% GST = 60
+
 def run_all_scenarios_report():
     """Runs all 21 test scenarios and returns a structured JSON summary."""
     suite = unittest.TestLoader().loadTestsFromTestCase(TestBillingAgentScenarios)

@@ -9,8 +9,10 @@ from typing import Dict, Any, List, Optional
 from backend.app.ml.model import predict_intent
 from backend.app.ml.entity_extractor import (
     extract_single_item, extract_bulk_items, extract_discount,
-    extract_gst_rate, extract_customer_info, extract_shop_type, extract_shop_name
+    extract_gst_rate, extract_customer_info, extract_shop_type, extract_shop_name,
+    extract_rate_change
 )
+from backend.app.billing.hsn_db import lookup_hsn
 from backend.app.billing.gst_engine import calculate_bill_totals, validate_gstin, mask_phone_number
 
 # In-memory session store (keyed by session_id)
@@ -253,6 +255,62 @@ def process_dialogue_turn(session_id: str, text: str) -> Dict[str, Any]:
                 reply = "कोई आइटम नहीं मिला जिसकी मात्रा बदलनी हो।"
             else:
                 reply = "Could not find that item in the current bill."
+        return build_turn_response(session, intent, confidence, reply, reply)
+
+    # Change Item Rate / Price
+    if intent in ["change_rate", "change_price"]:
+        res_rate = extract_rate_change(text, session.items)
+        target_name = res_rate["item_name"].lower()
+        new_rate = res_rate["new_rate"]
+        
+        found_item = None
+        for itm in session.items:
+            itm_name = itm["name"].lower()
+            if target_name in itm_name or itm_name in target_name or any(tok in itm_name.split() for tok in target_name.split() if len(tok) > 2):
+                itm["rate"] = new_rate
+                itm["price"] = new_rate
+                found_item = itm
+                break
+                
+        if not found_item and session.items:
+            # Fallback: update last item in the bill
+            session.items[-1]["rate"] = new_rate
+            session.items[-1]["price"] = new_rate
+            found_item = session.items[-1]
+
+        bill = session.get_bill_summary()
+        if found_item:
+            disp_name = found_item["name"]
+            if session.language == "hi":
+                reply = f"{disp_name} का रेट बदलकर ₹{new_rate:.2f} कर दिया। नया कुल: ₹{bill['grand_total']:.2f}।"
+            else:
+                reply = f"Updated {disp_name} rate to ₹{new_rate:.2f}. New Total: ₹{bill['grand_total']:.2f}."
+        else:
+            if session.language == "hi":
+                reply = f"बिल में {res_rate['item_name']} नहीं मिला जिसका रेट बदलना हो।"
+            else:
+                reply = f"Could not find {res_rate['item_name']} in the current bill to update rate."
+        return build_turn_response(session, intent, confidence, reply, reply)
+
+    # Query Item Price
+    if intent == "query_item_price":
+        found = None
+        clean_l = text.lower()
+        for itm in session.items:
+            if itm["name"].lower() in clean_l:
+                found = itm
+                break
+        if found:
+            if session.language == "hi":
+                reply = f"बिल में {found['name']} का रेट ₹{found['rate']:.2f} प्रति {found['unit']} है।"
+            else:
+                reply = f"{found['name']} is in your bill at ₹{found['rate']:.2f} per {found['unit']}."
+        else:
+            h_info = lookup_hsn(text)
+            if session.language == "hi":
+                reply = f"{h_info['description']} पर GST {h_info['rate']}% (HSN {h_info['hsn']}) लागू होता है।"
+            else:
+                reply = f"{h_info['description']} has {h_info['rate']}% GST (HSN {h_info['hsn']})."
         return build_turn_response(session, intent, confidence, reply, reply)
 
     # Cancel Last Item / Undo
