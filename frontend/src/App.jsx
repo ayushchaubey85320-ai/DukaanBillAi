@@ -7,8 +7,6 @@ import LiveBillCard from "./components/LiveBillCard";
 import BillModal from "./components/BillModal";
 import OnboardingModal from "./components/OnboardingModal";
 import BillHistory from "./components/BillHistory";
-import TestMatrixRunner from "./components/TestMatrixRunner";
-import ServerSettingsModal from "./components/ServerSettingsModal";
 import AuthModal from "./components/AuthModal";
 import SuperAdminPortal from "./components/SuperAdminPortal";
 import { 
@@ -227,37 +225,12 @@ export default function App() {
         currentUser={currentUser}
         onToggleLanguage={handleToggleLanguage}
         onOpenSettings={() => setActiveModal("settings")}
-        onOpenServerSettings={() => setActiveModal("server")}
         onOpenHistory={() => setActiveModal("history")}
-        onOpenTests={() => setActiveModal("tests")}
         onResetBill={handleResetBill}
         onOpenAuth={() => setActiveModal("auth")}
         onOpenAdmin={() => setActiveModal("admin")}
         onLogout={handleLogout}
       />
-
-      {/* Offline Alert Banner */}
-      {isOfflineMode && (
-        <div 
-          onClick={() => setActiveModal("server")}
-          style={{
-            background: "linear-gradient(90deg, rgba(239, 68, 68, 0.2), rgba(185, 28, 28, 0.3))",
-            borderBottom: "1px solid rgba(239, 68, 68, 0.4)",
-            padding: "8px 16px",
-            fontSize: "0.78rem",
-            color: "#fca5a5",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            cursor: "pointer"
-          }}
-        >
-          <span>⚠️ <strong>Backend Unreachable:</strong> Working from offline cache. Tap here to connect to Online Cloud Server or Local Wi-Fi.</span>
-          <span style={{ textDecoration: "underline", fontWeight: 700, color: "#fff", marginLeft: 8 }}>
-            Connect ⚙️
-          </span>
-        </div>
-      )}
 
       {/* Mobile Tab Switcher (< 860px) */}
       <div className="mobile-tab-bar">
@@ -347,19 +320,6 @@ export default function App() {
         />
       )}
 
-      {activeModal === "server" && (
-        <ServerSettingsModal
-          isOpen={true}
-          onClose={() => setActiveModal(null)}
-          onServerChanged={() => {
-            setIsOfflineMode(false);
-            // Refresh shop and bill from newly connected server
-            getShopProfile().then(res => res && setShopInfo(res)).catch(() => {});
-            getCurrentBill(sessionId).then(res => res && setBill(res)).catch(() => {});
-          }}
-        />
-      )}
-
       {activeModal === "history" && (
         <BillHistory
           onClose={() => setActiveModal(null)}
@@ -368,10 +328,6 @@ export default function App() {
             setActiveModal("invoice");
           }}
         />
-      )}
-
-      {activeModal === "tests" && (
-        <TestMatrixRunner onClose={() => setActiveModal(null)} />
       )}
     </div>
   );

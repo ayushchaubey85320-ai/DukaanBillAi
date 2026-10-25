@@ -422,6 +422,33 @@ class TestBillingAgentScenarios(unittest.TestCase):
         self.assertEqual(r7["intent"], "show_bill")
         self.assertEqual(r7["bill"]["grand_total"], 15.0)
 
+    def test_scenario_26_item_specific_gst_and_discount_order(self):
+        """Scenario 26: '100 kilo gehu 15 rupya', 'sirf gehu se gst htao', 'discount dedo 50%'."""
+        s_id = "test_s26_" + str(time.time())
+        sess = get_session(s_id)
+        sess.reset_bill()
+
+        # 1. Add 100 kg gehu at 15
+        r1 = process_dialogue_turn(s_id, "100 kilo gehu 15 rupya")
+        self.assertEqual(r1["intent"], "add_item")
+        self.assertEqual(len(r1["bill"]["items"]), 1)
+        self.assertEqual(r1["bill"]["items"][0]["quantity"], 100.0)
+        self.assertEqual(r1["bill"]["items"][0]["rate"], 15.0)
+
+        # 2. 'sirf gehu se gst htao' -> Must be remove_gst (NOT validate_gstin!) and zero gehu's tax
+        r2 = process_dialogue_turn(s_id, "sirf gehu se gst htao")
+        self.assertEqual(r2["intent"], "remove_gst")
+        self.assertNotIn("अमान्य GSTIN", r2["reply"])
+        self.assertEqual(r2["bill"]["items"][0]["gst_rate"], 0.0)
+        self.assertEqual(r2["bill"]["total_tax"], 0.0)
+        self.assertEqual(r2["bill"]["grand_total"], 1500.0)
+
+        # 3. 'discount dedo 50%' -> Must be 50.0% (NOT fallback 5%!)
+        r3 = process_dialogue_turn(s_id, "discount dedo 50%")
+        self.assertEqual(r3["intent"], "apply_discount")
+        self.assertEqual(r3["bill"]["discount_applied"], 750.0) # 50% of 1500
+        self.assertEqual(r3["bill"]["grand_total"], 750.0)
+
 def run_all_scenarios_report():
     """Runs all 21 test scenarios and returns a structured JSON summary."""
     suite = unittest.TestLoader().loadTestsFromTestCase(TestBillingAgentScenarios)

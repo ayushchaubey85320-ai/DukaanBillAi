@@ -1,7 +1,7 @@
 import React from "react";
 import { 
-  Store, Languages, History, CheckCircle2, Settings, PlusCircle, 
-  Smartphone, Globe, Shield, User, LogIn, LogOut 
+  Store, Languages, History, Settings, PlusCircle, 
+  Smartphone, Shield, User, LogIn, LogOut 
 } from "lucide-react";
 import { getApiBase } from "../services/api";
 
@@ -11,9 +11,7 @@ export default function Navbar({
   currentUser,
   onToggleLanguage,
   onOpenSettings,
-  onOpenServerSettings,
   onOpenHistory,
-  onOpenTests,
   onResetBill,
   onOpenAuth,
   onOpenAdmin,
@@ -125,28 +123,6 @@ export default function Navbar({
         >
           <Languages size={15} style={{ color: "var(--accent)" }} />
           <span>{language === "hi" ? "हिन्दी" : "English"}</span>
-        </button>
-
-        {/* Server Connection Setting */}
-        <button
-          onClick={onOpenServerSettings}
-          className="btn-secondary"
-          style={{ padding: "6px 12px", fontSize: "0.82rem", color: "#10b981" }}
-          title="Server Connection Settings (Online / Wi-Fi)"
-        >
-          <Globe size={15} />
-          <span style={{ display: "none", sm: "inline" }}>Server</span>
-        </button>
-
-        {/* 21-Scenario Test Matrix Button */}
-        <button
-          onClick={onOpenTests}
-          className="btn-secondary"
-          style={{ padding: "6px 12px", fontSize: "0.82rem" }}
-          title="Open Automated 21-Scenario Test Matrix"
-        >
-          <CheckCircle2 size={15} style={{ color: "var(--success)" }} />
-          <span style={{ display: "none", sm: "inline" }}>Tests</span>
         </button>
 
         {/* Past Bills History */}

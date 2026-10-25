@@ -1,49 +1,43 @@
 /**
  * API Service for Indian Retail Billing Agent
- * Interacts with FastAPI backend at port 8001 with offline local storage cache.
+ * Connected to Render cloud service: https://dukaanbillai.onrender.com
  */
 
-// Dynamic API Base URL resolver: checks user preference -> online public tunnel -> local network -> localhost
-export const DEFAULT_RENDER_URL = "https://dukaanbillai.onrender.com";
-export const DEFAULT_ONLINE_URL = "https://dukaanbillai.onrender.com";
-export const DEFAULT_LAN_URL = "http://192.168.1.14:8001";
-export const DEFAULT_LOCAL_URL = "http://127.0.0.1:8001";
+export const RENDER_CLOUD_URL = "https://dukaanbillai.onrender.com";
+export const RENDER_API_BASE = "https://dukaanbillai.onrender.com/api";
 
-// Dynamic API Base URL resolver: Render Cloud Server -> Current Origin -> Localhost
+// Auto-resolving API Base: Render Cloud (Mobile App & Hosted) or localhost:8001 (Local Dev only)
 export function getApiBase() {
-  const custom = localStorage.getItem("dukaan_backend_url");
-  if (custom && custom.trim()) {
-    // If old stale loca.lt URL was saved from earlier tests, clear it
-    if (custom.includes("loca.lt")) {
+  // Purge any old stale tunnel/LAN URLs from localStorage so devices always connect to Render
+  if (typeof window !== "undefined" && window.localStorage) {
+    const custom = localStorage.getItem("dukaan_backend_url");
+    if (custom && (custom.includes("loca.lt") || custom.includes("192.168.") || !custom.includes("onrender.com"))) {
       localStorage.removeItem("dukaan_backend_url");
-    } else {
-      return custom.trim().replace(/\/+$/, "") + (custom.includes("/api") ? "" : "/api");
     }
   }
 
-  // 1. If running in a web browser:
+  // 1. Web browser environment:
   if (typeof window !== "undefined" && window.location) {
     const host = window.location.hostname;
     const port = window.location.port;
 
-    // Local dev server only (Vite running on localhost:5174) -> point to local Python backend on 8001
+    // Local dev server only (Vite running on localhost:5174) -> local Python backend on 8001
     if ((host === "localhost" || host === "127.0.0.1") && port === "5174") {
       return "http://127.0.0.1:8001/api";
     }
 
-    // Any hosted website (Render, custom domain, or local IP in browser) -> always use same origin!
+    // Hosted on Render or any public web domain -> use same origin
     if (host && host !== "localhost" && host !== "127.0.0.1" && window.location.protocol.startsWith("http")) {
       return `${window.location.origin}/api`;
     }
   }
 
-  // 2. If running inside Capacitor native Android APK or standalone:
-  // Render is the primary cloud backend service!
-  return `${DEFAULT_RENDER_URL}/api`;
+  // 2. Native Mobile APK (Capacitor Android) -> Always connect directly to Render!
+  return RENDER_API_BASE;
 }
 
 export function setApiBase(url) {
-  if (!url) {
+  if (!url || !url.includes("onrender.com")) {
     localStorage.removeItem("dukaan_backend_url");
   } else {
     localStorage.setItem("dukaan_backend_url", url.trim().replace(/\/+$/, ""));

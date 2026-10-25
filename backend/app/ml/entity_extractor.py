@@ -178,20 +178,42 @@ def extract_rate_change(text: str, existing_items: List[Dict[str, Any]] = None) 
     }
 
 def extract_discount(text: str) -> Dict[str, Optional[float]]:
-    """Extracts discount percent or flat amount from text."""
-    # Percentage discount: "10% discount", "5 percent off"
-    m_pct = re.search(r'([0-9]+(?:\.[0-9]+)?)\s*(?:%|percent)\s*(?:discount|off|kam|chhut)', text, re.IGNORECASE)
-    if not m_pct:
-        m_pct = re.search(r'(?:discount|off|chhut)\s*([0-9]+(?:\.[0-9]+)?)\s*%', text, re.IGNORECASE)
+    """Extracts discount percent or flat amount from text with robust Hindi/Hinglish support."""
+    clean = normalize_devanagari_digits(text).lower()
+
+    # 1. Any percentage pattern: "50%", "50 percent", "50 pratishat", "discount dedo 50%"
+    m_pct = re.search(r'([0-9]+(?:\.[0-9]+)?)\s*(?:%|percent|pratishat|percentage)', clean, re.IGNORECASE)
     if m_pct:
         return {"discount_percent": float(m_pct.group(1)), "discount_amount": None}
 
-    # Flat amount discount: "₹100 off", "50 rupees discount", "100 rupay kam karo"
-    m_amt = re.search(r'(?:₹|rs\.?|inr|rupees?|rupay?)\s*([0-9]+(?:\.[0-9]+)?)\s*(?:discount|off|kam|chhut)', text, re.IGNORECASE)
+    # Word percentages in Hindi: "dus percent", "bees percent", "pachas percent"
+    word_pcts = {
+        "paanch": 5.0, "panch": 5.0, "five": 5.0,
+        "dus": 10.0, "das": 10.0, "ten": 10.0,
+        "pandrah": 15.0, "fifteen": 15.0,
+        "bees": 20.0, "twenty": 20.0,
+        "pachees": 25.0, "twenty five": 25.0,
+        "pachas": 50.0, "fifty": 50.0
+    }
+    for w, val in word_pcts.items():
+        if re.search(rf'\b{w}\s*(?:%|percent|pratishat|chhut|discount)\b', clean):
+            return {"discount_percent": val, "discount_amount": None}
+
+    # 2. Percentage before discount keywords: "10% discount", "5 off"
+    m_pct_pre = re.search(r'([0-9]+(?:\.[0-9]+)?)\s*(?:discount|off|kam|chhut)', clean, re.IGNORECASE)
+    # Check if this number could be a percentage (<= 100 and no rupees keyword)
+    if m_pct_pre and not re.search(r'(?:₹|rs\.?|inr|rupees?|rupay?|rupya)', clean):
+        val = float(m_pct_pre.group(1))
+        if val <= 100:
+            return {"discount_percent": val, "discount_amount": None}
+
+    # 3. Flat amount discount: "₹100 off", "50 rupees discount", "100 rupay kam karo", "discount dedo 50 rs"
+    m_amt = re.search(r'(?:₹|rs\.?|inr|rupees?|rupay?|rupya)\s*([0-9]+(?:\.[0-9]+)?)', clean, re.IGNORECASE)
     if not m_amt:
-        m_amt = re.search(r'([0-9]+(?:\.[0-9]+)?)\s*(?:₹|rs\.?|inr|rupees?|rupay?)\s*(?:discount|off|kam|chhut)', text, re.IGNORECASE)
+        m_amt = re.search(r'([0-9]+(?:\.[0-9]+)?)\s*(?:₹|rs\.?|inr|rupees?|rupay?|rupya)', clean, re.IGNORECASE)
     if not m_amt:
-        m_amt = re.search(r'(?:discount|off|chhut)\s*(?:of|de do)?\s*(?:₹|rs\.?|inr|rupees?)?\s*([0-9]+(?:\.[0-9]+)?)', text, re.IGNORECASE)
+        m_amt = re.search(r'(?:discount|off|chhut)\s*(?:dedo|de do|karo|laga do|lga do|do|of)?\s*([0-9]+(?:\.[0-9]+)?)', clean, re.IGNORECASE)
+
     if m_amt:
         return {"discount_percent": None, "discount_amount": float(m_amt.group(1))}
 

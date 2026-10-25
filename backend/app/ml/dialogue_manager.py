@@ -147,10 +147,10 @@ def process_dialogue_turn(session_id: str, text: str) -> Dict[str, Any]:
                     reply = f"Excellent! '{sn}' is ready for billing. Start adding items (e.g., '2 kg rice at 60 rupees')."
                 return build_turn_response(session, intent, confidence, reply, reply)
 
-    # Validate GSTIN
-    if intent == "validate_gstin" or ("gst" in text.lower() and len(text.replace(" ", "")) >= 15):
-        m = re.search(r'\b([0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1})\b', text.upper())
-        gstin_val = m.group(1) if m else text.strip().upper()
+    # Validate GSTIN (Only when explicitly validating GSTIN or matching 15-character GSTIN format)
+    gstin_match = re.search(r'\b([0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1})\b', text.upper())
+    if intent == "validate_gstin" or gstin_match:
+        gstin_val = gstin_match.group(1) if gstin_match else text.strip().upper()
         res = validate_gstin(gstin_val)
         if res["valid"]:
             session.shop_info["gstin"] = res["gstin"]
@@ -396,16 +396,33 @@ def process_dialogue_turn(session_id: str, text: str) -> Dict[str, Any]:
             reply = f"Applied {desc} discount. Final Total: ₹{bill['grand_total']:.2f}."
         return build_turn_response(session, intent, confidence, reply, reply)
 
-    # Remove GST / 0% Tax (e.g. "gst htao", "gst hatao", "remove gst")
+    # Remove GST / 0% Tax (e.g. "gst htao", "sirf gehu se gst htao", "remove gst")
     if intent == "remove_gst":
-        session.gst_override = 0.0
+        # Check if user specified a specific item: "sirf gehu se gst htao", "gehu se gst hatao"
+        target_item = None
+        lower_text = text.lower()
         for itm in session.items:
-            itm["gst_rate"] = 0.0
-        bill = session.get_bill_summary()
-        if session.language == "hi":
-            reply = f"GST हटा दिया गया (0% टैक्स)। कुल बिल: ₹{bill['grand_total']:.2f}।"
+            itm_name = itm.get("name", "").lower()
+            if itm_name and (itm_name in lower_text or any(w in lower_text for w in itm_name.split() if len(w) > 2)):
+                target_item = itm
+                break
+
+        if target_item:
+            target_item["gst_rate"] = 0.0
+            bill = session.get_bill_summary()
+            if session.language == "hi":
+                reply = f"{target_item['name']} से GST हटा दिया गया (0% टैक्स)। कुल बिल: ₹{bill['grand_total']:.2f}।"
+            else:
+                reply = f"Removed GST from {target_item['name']} (0% tax applied). Grand Total: ₹{bill['grand_total']:.2f}."
         else:
-            reply = f"Removed GST (0% tax applied). Grand Total: ₹{bill['grand_total']:.2f}."
+            session.gst_override = 0.0
+            for itm in session.items:
+                itm["gst_rate"] = 0.0
+            bill = session.get_bill_summary()
+            if session.language == "hi":
+                reply = f"GST हटा दिया गया (0% टैक्स)। कुल बिल: ₹{bill['grand_total']:.2f}।"
+            else:
+                reply = f"Removed GST (0% tax applied). Grand Total: ₹{bill['grand_total']:.2f}."
         return build_turn_response(session, intent, confidence, reply, reply)
 
     # Add / Override GST

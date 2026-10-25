@@ -165,6 +165,10 @@ def predict_intent(text: str) -> Dict[str, Any]:
     ]) or (("gst" in lower_t or "tax" in lower_t or "जीएसटी" in lower_t or "टैक्स" in lower_t) and any(w in lower_t for w in ["htao", "hatao", "hata", "nikal", "mat", "bina", "without", "remove", "no", "zero", "हटाओ", "हटा"])):
         return {"intent": "remove_gst", "confidence": 0.99, "clean_text": cleaned}
 
+    # 15-character GSTIN number (e.g., 09AJSHB8923D2J8, 07AAACB1234D1Z5)
+    if re.search(r'\b[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}\b', text.upper()):
+        return {"intent": "validate_gstin", "confidence": 0.99, "clean_text": cleaned}
+
     if any(w in lower_t for w in ["discount", "percent off", "off kar do", "chhut"]):
         return {"intent": "apply_discount", "confidence": 0.95, "clean_text": cleaned}
     if any(w in lower_t for w in ["gst", "tax lagao", "tax add", "जीएसटी"]) and not any(w in lower_t for w in ["htao", "hatao", "hata", "nikal", "mat", "bina", "without", "remove", "no", "zero", "हटाओ", "हटा"]):
