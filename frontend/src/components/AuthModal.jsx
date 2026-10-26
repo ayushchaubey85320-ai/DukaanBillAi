@@ -5,8 +5,12 @@ import {
 } from "lucide-react";
 import { loginUser, registerUser } from "../services/api";
 
-export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
-  const [activeTab, setActiveTab] = useState("login"); // "login" | "register" | "admin"
+export default function AuthModal({ isOpen, onClose, onAuthSuccess, initialTab = "login" }) {
+  const [activeTab, setActiveTab] = useState(initialTab); // "login" | "register" | "admin"
+
+  React.useEffect(() => {
+    if (initialTab) setActiveTab(initialTab);
+  }, [initialTab, isOpen]);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");

@@ -8,3 +8,6 @@ qrcode>=8.0
 pillow>=10.0.0
 pyjwt>=2.8.0
 python-multipart>=0.0.9
+pymysql>=1.1.0
+cryptography>=42.0.0
+requests>=2.31.0

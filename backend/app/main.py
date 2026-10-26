@@ -116,6 +116,7 @@ def health_check():
 
 # --- Authentication Endpoints ---
 @app.post("/api/auth/register")
+@app.post("/api/auth/register/")
 def register_endpoint(req: RegisterRequest):
     """Registers a new shopkeeper account and returns a 30-day JWT token."""
     cleaned_phone = req.phone.strip().replace(" ", "").replace("-", "")
@@ -155,6 +156,7 @@ def register_endpoint(req: RegisterRequest):
     }
 
 @app.post("/api/auth/login")
+@app.post("/api/auth/login/")
 def login_endpoint(req: LoginRequest):
     """Authenticates phone & password for shopkeeper or super admin."""
     cleaned_phone = req.phone.strip().replace(" ", "").replace("-", "")
@@ -322,6 +324,7 @@ def get_current_bill(session_id: str):
     return session.get_bill_summary()
 
 @app.post("/api/bill/save")
+@app.post("/api/bill/save/")
 def save_bill_endpoint(req: SaveBillRequest, authorization: Optional[str] = Header(None)):
     """Saves the current bill in the database and resets session for the next customer."""
     session = get_session(req.session_id)
@@ -344,6 +347,7 @@ def save_bill_endpoint(req: SaveBillRequest, authorization: Optional[str] = Head
     }
 
 @app.get("/api/bill/history")
+@app.get("/api/bill/history/")
 def bill_history_endpoint(limit: int = 50, authorization: Optional[str] = Header(None)):
     """Returns saved bills history filtered for the current shopkeeper."""
     user = get_current_user_optional(authorization)
@@ -459,6 +463,11 @@ def download_super_admin_apk_endpoint():
                 filename="DukaanAI-SuperAdmin.apk"
             )
     raise HTTPException(status_code=404, detail="Super Admin APK is not available on this server")
+
+# API Fallback: Catch any unmatched /api route so it never hits StaticFiles with 405 Method Not Allowed
+@app.api_route("/api/{full_path:path}", methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"])
+def api_not_found(full_path: str):
+    raise HTTPException(status_code=404, detail=f"API endpoint '/api/{full_path}' not found")
 
 # Mount frontend/dist static files if available (Single full-stack service on Render)
 frontend_dist_dir = os.path.join(

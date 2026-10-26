@@ -1,9 +1,9 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { 
   Store, Languages, History, Settings, PlusCircle, 
-  Smartphone, Shield, User, LogIn, LogOut 
+  Smartphone, Shield, User, LogIn, LogOut, Database, Sparkles 
 } from "lucide-react";
-import { getApiBase } from "../services/api";
+import { getApiBase, pingBackend } from "../services/api";
 
 export default function Navbar({
   shopInfo,
@@ -15,37 +15,82 @@ export default function Navbar({
   onResetBill,
   onOpenAuth,
   onOpenAdmin,
+  onOpenServerModal,
   onLogout
 }) {
+  const [dbConnected, setDbConnected] = useState(true);
+
+  useEffect(() => {
+    pingBackend()
+      .then(() => setDbConnected(true))
+      .catch(() => setDbConnected(false));
+  }, []);
+
   return (
     <header className="header-bar">
+      {/* Brand & Store Profile */}
       <div className="brand-badge">
         <div style={{
-          width: 38,
-          height: 38,
-          borderRadius: 10,
-          background: "linear-gradient(135deg, var(--accent), #b45309)",
+          width: 42,
+          height: 42,
+          borderRadius: "var(--radius-md)",
+          background: "linear-gradient(135deg, #10b981, #059669)",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
           fontWeight: 800,
-          fontSize: "1.2rem",
-          color: "#fff",
-          boxShadow: "0 2px 10px rgba(217, 119, 6, 0.4)"
+          fontSize: "1.25rem",
+          color: "#ffffff",
+          boxShadow: "0 4px 14px rgba(16, 185, 129, 0.4)"
         }}>
           ₹
         </div>
         <div>
-          <div className="brand-title">DukaanAI</div>
+          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            <span className="brand-title">DukaanAI</span>
+            <span style={{
+              fontSize: "0.68rem",
+              background: "rgba(16, 185, 129, 0.18)",
+              border: "1px solid rgba(16, 185, 129, 0.4)",
+              color: "#34d399",
+              padding: "1px 6px",
+              borderRadius: "var(--radius-full)",
+              fontWeight: 700,
+              display: "flex",
+              alignItems: "center",
+              gap: 3
+            }}>
+              <Sparkles size={9} />
+              Gemini 3.5
+            </span>
+          </div>
           <div className="brand-subtitle">
             {shopInfo?.name || "Retail Billing"} • <span style={{ color: "var(--accent)" }}>{shopInfo?.type?.toUpperCase() || "KIRANA"}</span>
           </div>
         </div>
       </div>
 
+      {/* Nav Badges & Controls */}
       <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", justifyContent: "flex-end" }}>
-        {/* Super Admin Master Portal Button (Visible for Super Admin) */}
-        {currentUser?.role === "super_admin" && (
+        {/* MySQL Cloud Database Status Badge */}
+        <button
+          onClick={onOpenServerModal}
+          className="btn-secondary"
+          style={{
+            padding: "5px 10px",
+            fontSize: "0.78rem",
+            background: dbConnected ? "rgba(16, 185, 129, 0.12)" : "rgba(239, 68, 68, 0.12)",
+            borderColor: dbConnected ? "rgba(16, 185, 129, 0.35)" : "rgba(239, 68, 68, 0.35)",
+            color: dbConnected ? "#6ee7b7" : "#fca5a5"
+          }}
+          title="Database: Aiven Cloud MySQL (Click to view server settings)"
+        >
+          <Database size={13} />
+          <span>{dbConnected ? "MySQL Cloud" : "Offline Cache"}</span>
+        </button>
+
+        {/* Super Admin Access Button */}
+        {currentUser?.role === "super_admin" ? (
           <button
             onClick={onOpenAdmin}
             style={{
@@ -67,6 +112,22 @@ export default function Navbar({
             <Shield size={15} />
             <span>Super Admin</span>
           </button>
+        ) : (
+          <button
+            onClick={onOpenAdmin}
+            className="btn-secondary"
+            style={{
+              padding: "5px 10px",
+              fontSize: "0.78rem",
+              background: "rgba(245, 158, 11, 0.12)",
+              borderColor: "rgba(245, 158, 11, 0.35)",
+              color: "#fbbf24"
+            }}
+            title="Super Admin Portal Login"
+          >
+            <Shield size={13} />
+            <span>Admin</span>
+          </button>
         )}
 
         {/* User Account / Login Button */}
@@ -76,13 +137,13 @@ export default function Navbar({
             alignItems: "center",
             gap: 6,
             background: "rgba(255, 255, 255, 0.06)",
-            border: "1px solid rgba(255, 255, 255, 0.12)",
+            border: "1px solid rgba(255, 255, 255, 0.14)",
             borderRadius: 8,
             padding: "4px 8px"
           }}>
             <div style={{ display: "flex", alignItems: "center", gap: 5, fontSize: "0.78rem", color: "#e2e8f0" }}>
               <User size={13} style={{ color: "#34d399" }} />
-              <span style={{ fontWeight: 600, maxWidth: 100, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+              <span style={{ fontWeight: 600, maxWidth: 110, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                 {currentUser.shop_name || currentUser.full_name}
               </span>
             </div>
@@ -106,10 +167,10 @@ export default function Navbar({
           <button
             onClick={onOpenAuth}
             className="btn-secondary"
-            style={{ padding: "6px 12px", fontSize: "0.82rem", color: "#34d399", borderColor: "rgba(16, 185, 129, 0.3)" }}
+            style={{ padding: "6px 12px", fontSize: "0.82rem", color: "#34d399", borderColor: "rgba(16, 185, 129, 0.35)" }}
             title="Login or Register Shopkeeper Account"
           >
-            <LogIn size={15} />
+            <LogIn size={14} />
             <span>Login / Register</span>
           </button>
         )}
@@ -121,7 +182,7 @@ export default function Navbar({
           style={{ padding: "6px 12px", fontSize: "0.82rem" }}
           title="Toggle Language (English / हिंदी)"
         >
-          <Languages size={15} style={{ color: "var(--accent)" }} />
+          <Languages size={14} style={{ color: "var(--accent)" }} />
           <span>{language === "hi" ? "हिन्दी" : "English"}</span>
         </button>
 
@@ -132,7 +193,7 @@ export default function Navbar({
           style={{ padding: "6px 12px", fontSize: "0.82rem" }}
           title="Past Bills History"
         >
-          <History size={15} />
+          <History size={14} />
         </button>
 
         {/* Shop Profile Settings */}
@@ -142,7 +203,7 @@ export default function Navbar({
           style={{ padding: "6px 12px", fontSize: "0.82rem" }}
           title="Shop Profile Settings & GST"
         >
-          <Settings size={15} />
+          <Settings size={14} />
         </button>
 
         {/* Download Android APK Button */}
@@ -154,7 +215,7 @@ export default function Navbar({
           style={{ padding: "6px 12px", fontSize: "0.82rem", textDecoration: "none", color: "var(--success)" }}
           title="Download Android APK"
         >
-          <Smartphone size={15} />
+          <Smartphone size={14} />
           <span>APK</span>
         </a>
 

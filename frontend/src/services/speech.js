@@ -2,38 +2,38 @@
  * High-Definition Voice Recognition & Natural Speech Engine
  * Enhanced for Indian Accents: English (India) [en-IN] & Hindi [hi-IN]
  * Features:
- * - Asynchronous natural voice resolution (Microsoft Swara/Neerja, Google हिन्दी/en-IN)
- * - Interim live speech streaming for instant visual feedback
- * - Web Audio API synthesized audio beeps for mic on/off confirmation
- * - Calibrated cadence and natural pitch
+ * - Manual mic open/close control: stays listening until user manually taps stop
+ * - Auto-restart on intermittent browser silence pauses during manual recording
+ * - Instant TTS cancellation when opening mic or pressing stop
+ * - Audio visualizer state notifications
+ * - Web Audio API synthesized audio chimes for tactile feedback
  */
 
 class SpeechService {
   constructor() {
     this.recognition = null;
     this.isListening = false;
+    this.manualListeningActive = false;
+    this.accumulatedTranscript = "";
+    this.interimTranscript = "";
     this.language = "en-IN";
-    this.onResultCallback = null;
-    this.onInterimCallback = null;
+    this.onTranscriptUpdateCallback = null;
     this.onErrorCallback = null;
-    this.onEndCallback = null;
+    this.onSpeakingChangeCallback = null;
     this.audioCtx = null;
-    this.voicesLoaded = false;
     this.cachedVoices = [];
+    this.isSpeaking = false;
 
     // Initialize Voice Synthesis voices listener
     if (typeof window !== "undefined" && "speechSynthesis" in window) {
       const loadVoices = () => {
         this.cachedVoices = window.speechSynthesis.getVoices();
-        if (this.cachedVoices.length > 0) {
-          this.voicesLoaded = true;
-        }
       };
       loadVoices();
       window.speechSynthesis.onvoiceschanged = loadVoices;
     }
 
-    // Initialize Speech Recognition
+    // Initialize Web Speech Recognition
     const SpeechRecognition = typeof window !== "undefined" && (window.SpeechRecognition || window.webkitSpeechRecognition);
     if (SpeechRecognition) {
       this.recognition = new SpeechRecognition();
@@ -42,40 +42,43 @@ class SpeechService {
       this.recognition.maxAlternatives = 3;
       this.recognition.lang = this.language;
 
-      let finalTranscript = "";
-
       this.recognition.onresult = (event) => {
-        let interimTranscript = "";
+        let currentInterim = "";
         for (let i = event.resultIndex; i < event.results.length; ++i) {
+          const transcript = event.results[i][0].transcript;
           if (event.results[i].isFinal) {
-            finalTranscript += event.results[i][0].transcript + " ";
+            this.accumulatedTranscript += (this.accumulatedTranscript ? " " : "") + transcript.trim();
           } else {
-            interimTranscript += event.results[i][0].transcript;
+            currentInterim += transcript;
           }
         }
+        this.interimTranscript = currentInterim;
 
-        if (this.onInterimCallback && interimTranscript) {
-          this.onInterimCallback(interimTranscript);
-        }
-
-        if (finalTranscript.trim() && this.onResultCallback) {
-          const sent = finalTranscript.trim();
-          finalTranscript = "";
-          this.onResultCallback(sent);
+        // Provide full combined text to caller in real time
+        const fullDisplay = (this.accumulatedTranscript + (currentInterim ? " " + currentInterim : "")).trim();
+        if (this.onTranscriptUpdateCallback) {
+          this.onTranscriptUpdateCallback(fullDisplay, currentInterim);
         }
       };
 
       this.recognition.onerror = (event) => {
-        console.warn("Speech recognition notice:", event.error);
+        console.warn("Speech recognition event:", event.error);
         if (event.error !== "no-speech") {
-          this.isListening = false;
           if (this.onErrorCallback) this.onErrorCallback(event.error);
         }
       };
 
       this.recognition.onend = () => {
-        this.isListening = false;
-        if (this.onEndCallback) this.onEndCallback();
+        // If manual recording is still active, auto-restart so the user isn't cut off by browser silence timeout!
+        if (this.manualListeningActive) {
+          try {
+            this.recognition.start();
+          } catch (e) {
+            // Already started or restarting
+          }
+        } else {
+          this.isListening = false;
+        }
       };
     }
   }
@@ -97,7 +100,7 @@ class SpeechService {
 
       const now = ctx.currentTime;
       if (type === "start") {
-        // High-tech ascending double-beep
+        // High-tech ascending chime
         osc.frequency.setValueAtTime(587.33, now); // D5
         osc.frequency.exponentialRampToValueAtTime(880, now + 0.12); // A5
         gain.gain.setValueAtTime(0.12, now);
@@ -114,7 +117,7 @@ class SpeechService {
         osc.stop(now + 0.22);
       }
     } catch (e) {
-      // AudioContext not allowed before user gesture
+      // AudioContext policy
     }
   }
 
@@ -125,57 +128,95 @@ class SpeechService {
     }
   }
 
-  startListening(onResult, onInterim, onError, onEnd) {
+  // Manual Mic Control: User controls when to open and when to close!
+  startManualListening({ onTranscriptUpdate, onError, initialText = "" }) {
+    // Immediately stop any playing assistant speech to avoid microphone feedback
+    this.cancelSpeech();
+
     if (!this.recognition) {
-      if (onError) onError("Speech Recognition not supported in this browser. Please use text input.");
+      if (onError) onError("Speech Recognition is not supported on this device/browser. Please type.");
       return;
     }
-    this.onResultCallback = onResult;
-    this.onInterimCallback = onInterim;
+
+    this.accumulatedTranscript = initialText ? initialText.trim() : "";
+    this.interimTranscript = "";
+    this.onTranscriptUpdateCallback = onTranscriptUpdate;
     this.onErrorCallback = onError;
-    this.onEndCallback = onEnd;
+    this.manualListeningActive = true;
+    this.isListening = true;
 
     try {
       this.playChime("start");
       this.recognition.lang = this.language;
       this.recognition.start();
-      this.isListening = true;
     } catch (e) {
-      console.warn("Recognition start info:", e);
+      console.warn("Recognition start notice:", e);
     }
   }
 
-  stopListening() {
-    if (this.recognition && this.isListening) {
-      this.playChime("stop");
-      this.recognition.stop();
-      this.isListening = false;
+  stopManualListening() {
+    this.manualListeningActive = false;
+    this.isListening = false;
+    this.playChime("stop");
+
+    if (this.recognition) {
+      try {
+        this.recognition.stop();
+      } catch (e) {}
+    }
+
+    const finalText = (this.accumulatedTranscript + (this.interimTranscript ? " " + this.interimTranscript : "")).trim();
+    this.accumulatedTranscript = "";
+    this.interimTranscript = "";
+    return finalText;
+  }
+
+  cancelManualListening() {
+    this.manualListeningActive = false;
+    this.isListening = false;
+    this.accumulatedTranscript = "";
+    this.interimTranscript = "";
+    if (this.recognition) {
+      try {
+        this.recognition.abort();
+      } catch (e) {}
     }
   }
 
-  // High quality natural Indian voice synthesizer
+  // TTS Speech Control
+  cancelSpeech() {
+    if (typeof window !== "undefined" && "speechSynthesis" in window) {
+      window.speechSynthesis.cancel();
+      this.isSpeaking = false;
+      if (this.onSpeakingChangeCallback) {
+        this.onSpeakingChangeCallback(false);
+      }
+    }
+  }
+
+  setSpeakingChangeListener(cb) {
+    this.onSpeakingChangeCallback = cb;
+  }
+
   speak(text, lang = "en") {
     if (!('speechSynthesis' in window) || !text) return;
 
-    window.speechSynthesis.cancel();
+    this.cancelSpeech();
 
     const utterance = new SpeechSynthesisUtterance(text);
     const isHindi = lang === "hi";
     utterance.lang = isHindi ? "hi-IN" : "en-IN";
-    utterance.rate = 0.94; // slightly slower, natural human cadence
+    utterance.rate = 0.95;
     utterance.pitch = 1.02;
 
     const voices = this.cachedVoices.length > 0 ? this.cachedVoices : window.speechSynthesis.getVoices();
-    
     let preferredVoice = null;
     if (isHindi) {
-      // Look for natural Hindi voices
       preferredVoice = voices.find(v => 
         (v.lang === "hi-IN" || v.lang.startsWith("hi")) && 
         (v.name.includes("Natural") || v.name.includes("Swara") || v.name.includes("Google") || v.name.includes("Kalpana"))
       ) || voices.find(v => v.lang.startsWith("hi"));
     } else {
-      // Look for natural Indian English voices
       preferredVoice = voices.find(v => 
         (v.lang === "en-IN" || v.lang.includes("India")) && 
         (v.name.includes("Natural") || v.name.includes("Neerja") || v.name.includes("Heera") || v.name.includes("Google"))
@@ -185,6 +226,21 @@ class SpeechService {
     if (preferredVoice) {
       utterance.voice = preferredVoice;
     }
+
+    utterance.onstart = () => {
+      this.isSpeaking = true;
+      if (this.onSpeakingChangeCallback) this.onSpeakingChangeCallback(true);
+    };
+
+    utterance.onend = () => {
+      this.isSpeaking = false;
+      if (this.onSpeakingChangeCallback) this.onSpeakingChangeCallback(false);
+    };
+
+    utterance.onerror = () => {
+      this.isSpeaking = false;
+      if (this.onSpeakingChangeCallback) this.onSpeakingChangeCallback(false);
+    };
 
     window.speechSynthesis.speak(utterance);
   }

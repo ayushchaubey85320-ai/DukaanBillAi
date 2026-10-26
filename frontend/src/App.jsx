@@ -9,6 +9,7 @@ import OnboardingModal from "./components/OnboardingModal";
 import BillHistory from "./components/BillHistory";
 import AuthModal from "./components/AuthModal";
 import SuperAdminPortal from "./components/SuperAdminPortal";
+import ServerSettingsModal from "./components/ServerSettingsModal";
 import { 
   sendChatMessage, getCurrentBill, getShopProfile,
   getCurrentUser, logoutUser, isImpersonating, exitImpersonation
@@ -22,6 +23,7 @@ export default function App() {
   const [isOfflineMode, setIsOfflineMode] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
   const [impersonating, setImpersonating] = useState(() => isImpersonating());
+  const [authInitialTab, setAuthInitialTab] = useState("login");
 
   const [shopInfo, setShopInfo] = useState({
     name: "Apna Super Store",
@@ -94,6 +96,20 @@ export default function App() {
     setImpersonating(false);
     setActiveModal("admin");
     getShopProfile().then(res => res && setShopInfo(res)).catch(() => {});
+  };
+
+  const handleOpenAdmin = () => {
+    if (currentUser?.role === "super_admin") {
+      setActiveModal("admin");
+    } else {
+      setAuthInitialTab("admin");
+      setActiveModal("auth");
+    }
+  };
+
+  const handleOpenAuth = (tab = "login") => {
+    setAuthInitialTab(tab);
+    setActiveModal("auth");
   };
 
   const handleSendMessage = async (userText) => {
@@ -227,8 +243,9 @@ export default function App() {
         onOpenSettings={() => setActiveModal("settings")}
         onOpenHistory={() => setActiveModal("history")}
         onResetBill={handleResetBill}
-        onOpenAuth={() => setActiveModal("auth")}
-        onOpenAdmin={() => setActiveModal("admin")}
+        onOpenAuth={() => handleOpenAuth("login")}
+        onOpenAdmin={handleOpenAdmin}
+        onOpenServerModal={() => setActiveModal("server")}
         onLogout={handleLogout}
       />
 
@@ -274,10 +291,12 @@ export default function App() {
         >
           <LiveBillCard
             bill={bill}
+            sessionId={sessionId}
             onRemoveItem={handleRemoveItem}
             onChangeQuantity={handleChangeQuantity}
             onFinalizeBill={handleFinalizeBill}
             onResetBill={handleResetBill}
+            onBillSaved={handleResetBill}
           />
         </section>
       </main>
@@ -286,6 +305,7 @@ export default function App() {
       {activeModal === "auth" && (
         <AuthModal
           isOpen={true}
+          initialTab={authInitialTab}
           onClose={() => setActiveModal(null)}
           onAuthSuccess={handleAuthSuccess}
         />
@@ -326,6 +346,16 @@ export default function App() {
           onSelectBill={(selected) => {
             setBill(selected);
             setActiveModal("invoice");
+          }}
+        />
+      )}
+
+      {activeModal === "server" && (
+        <ServerSettingsModal
+          isOpen={true}
+          onClose={() => setActiveModal(null)}
+          onServerChanged={() => {
+            getShopProfile().then(res => res && setShopInfo(res)).catch(() => {});
           }}
         />
       )}

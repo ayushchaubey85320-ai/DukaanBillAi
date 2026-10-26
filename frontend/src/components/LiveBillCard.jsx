@@ -1,13 +1,20 @@
-import React from "react";
-import { Receipt, Trash2, Plus, Minus, FileText, ArrowRight, User } from "lucide-react";
+import React, { useState } from "react";
+import { Receipt, Trash2, Plus, Minus, FileText, ArrowRight, User, Save, CheckCircle2, AlertCircle } from "lucide-react";
+import { saveBill } from "../services/api";
 
 export default function LiveBillCard({
   bill,
+  sessionId,
   onRemoveItem,
   onChangeQuantity,
   onFinalizeBill,
-  onResetBill
+  onResetBill,
+  onBillSaved
 }) {
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
+  const [saveError, setSaveError] = useState("");
+
   const items = bill?.items || [];
   const grandTotal = bill?.grand_total || 0;
   const subtotal = bill?.items_subtotal || 0;
@@ -16,8 +23,27 @@ export default function LiveBillCard({
   const sgst = bill?.total_sgst || 0;
   const roundOff = bill?.round_off || 0;
 
+  const handleDirectSave = async () => {
+    if (!items.length || isSaving) return;
+    setIsSaving(true);
+    setSaveError("");
+    try {
+      await saveBill(sessionId);
+      setSaveSuccess(true);
+      setTimeout(() => {
+        setSaveSuccess(false);
+        if (onBillSaved) onBillSaved();
+      }, 1200);
+    } catch (err) {
+      setSaveError(err.message || "Failed to save bill to database");
+      setTimeout(() => setSaveError(""), 3500);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   return (
-    <div className="glass-panel" style={{ display: "flex", flexDirection: "column", height: "100%", width: "100%", minWidth: 0, padding: 14 }}>
+    <div className="glass-panel" style={{ display: "flex", flexDirection: "column", height: "100%", width: "100%", minWidth: 0, padding: 16 }}>
       {/* Header */}
       <div style={{
         display: "flex",
@@ -27,10 +53,22 @@ export default function LiveBillCard({
         paddingBottom: 12,
         marginBottom: 12
       }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <Receipt size={20} style={{ color: "var(--accent)" }} />
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <div style={{
+            width: 36,
+            height: 36,
+            borderRadius: "var(--radius-md)",
+            background: "rgba(16, 185, 129, 0.15)",
+            border: "1px solid rgba(16, 185, 129, 0.3)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            color: "var(--accent)"
+          }}>
+            <Receipt size={20} />
+          </div>
           <div>
-            <div style={{ fontWeight: 700, fontSize: "1rem" }}>Current Receipt</div>
+            <div style={{ fontWeight: 700, fontSize: "1.05rem" }}>Live Receipt</div>
             <div style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>
               {bill?.bill_id || "INV-1001"} • {bill?.date || "Today"}
             </div>
@@ -39,23 +77,24 @@ export default function LiveBillCard({
 
         {bill?.customer_name && bill?.customer_name !== "Cash Customer" && (
           <div style={{
-            fontSize: "0.75rem",
-            background: "rgba(30, 58, 138, 0.4)",
-            border: "1px solid rgba(59, 130, 246, 0.3)",
-            padding: "4px 8px",
-            borderRadius: "var(--radius-sm)",
+            fontSize: "0.78rem",
+            background: "rgba(30, 58, 138, 0.45)",
+            border: "1px solid rgba(59, 130, 246, 0.4)",
+            padding: "4px 10px",
+            borderRadius: "var(--radius-full)",
             display: "flex",
             alignItems: "center",
-            gap: 4
+            gap: 6,
+            color: "#93c5fd"
           }}>
-            <User size={12} />
-            <span>{bill.customer_name}</span>
+            <User size={13} />
+            <span style={{ fontWeight: 600 }}>{bill.customer_name}</span>
           </div>
         )}
       </div>
 
       {/* Items List */}
-      <div style={{ flex: 1, overflowY: "auto", minHeight: 180, marginBottom: 14 }}>
+      <div style={{ flex: 1, overflowY: "auto", minHeight: 180, marginBottom: 12 }}>
         {items.length === 0 ? (
           <div style={{
             height: "100%",
@@ -65,13 +104,24 @@ export default function LiveBillCard({
             justifyContent: "center",
             color: "var(--text-dim)",
             textAlign: "center",
-            padding: 20
+            padding: 24
           }}>
-            <Receipt size={40} style={{ opacity: 0.3, marginBottom: 10 }} />
-            <div style={{ fontWeight: 500, fontSize: "0.95rem" }}>Bill is empty</div>
-            <div style={{ fontSize: "0.8rem", maxWidth: 220, marginTop: 4 }}>
-              Tap the mic and say: <br />
-              <i style={{ color: "var(--text-muted)" }}>"2 kg rice at 60 rupees"</i>
+            <div style={{
+              width: 56,
+              height: 56,
+              borderRadius: "50%",
+              background: "rgba(255, 255, 255, 0.04)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              marginBottom: 12
+            }}>
+              <Receipt size={28} style={{ opacity: 0.4 }} />
+            </div>
+            <div style={{ fontWeight: 600, fontSize: "1rem", color: "#e2e8f0" }}>No items in bill yet</div>
+            <div style={{ fontSize: "0.82rem", maxWidth: 240, marginTop: 6, lineHeight: 1.4 }}>
+              Tap the microphone and say: <br />
+              <i style={{ color: "var(--accent)" }}>"2 kg rice 60 rs, 3 biscuit 20 each"</i>
             </div>
           </div>
         ) : (
@@ -89,9 +139,9 @@ export default function LiveBillCard({
               {items.map((it, idx) => (
                 <tr key={idx}>
                   <td>
-                    <div style={{ fontWeight: 600 }}>{it.name}</div>
+                    <div style={{ fontWeight: 600, color: "#f8fafc" }}>{it.name}</div>
                     <div style={{ fontSize: "0.68rem", color: "var(--text-dim)" }}>
-                      HSN: {it.hsn} • GST: {it.gst_rate}%
+                      HSN: {it.hsn || "9999"} • GST: {it.gst_rate || 5}%
                     </div>
                   </td>
                   <td>
@@ -101,45 +151,45 @@ export default function LiveBillCard({
                         style={{
                           background: "rgba(255, 255, 255, 0.08)",
                           border: "none",
-                          color: "#fff",
-                          width: 20,
-                          height: 20,
+                          width: 22,
+                          height: 22,
                           borderRadius: 4,
-                          cursor: "pointer",
                           display: "flex",
                           alignItems: "center",
-                          justifyContent: "center"
+                          justifyContent: "center",
+                          color: "#fff",
+                          cursor: "pointer"
                         }}
                       >
-                        <Minus size={10} />
+                        <Minus size={11} />
                       </button>
-                      <span style={{ fontSize: "0.82rem", fontWeight: 600, minWidth: 28, textAlign: "center" }}>
-                        {it.quantity} {it.unit}
+                      <span style={{ fontSize: "0.85rem", minWidth: 28, textAlign: "center", fontWeight: 600 }}>
+                        {it.quantity}{it.unit ? ` ${it.unit}` : ""}
                       </span>
                       <button
                         onClick={() => onChangeQuantity(it.name, it.quantity + 1)}
                         style={{
                           background: "rgba(255, 255, 255, 0.08)",
                           border: "none",
-                          color: "#fff",
-                          width: 20,
-                          height: 20,
+                          width: 22,
+                          height: 22,
                           borderRadius: 4,
-                          cursor: "pointer",
                           display: "flex",
                           alignItems: "center",
-                          justifyContent: "center"
+                          justifyContent: "center",
+                          color: "#fff",
+                          cursor: "pointer"
                         }}
                       >
-                        <Plus size={10} />
+                        <Plus size={11} />
                       </button>
                     </div>
                   </td>
-                  <td style={{ textAlign: "right", color: "var(--text-muted)" }}>
-                    ₹{it.rate}
+                  <td style={{ textAlign: "right", fontSize: "0.85rem", color: "var(--text-muted)" }}>
+                    ₹{Number(it.rate).toFixed(2)}
                   </td>
-                  <td style={{ textAlign: "right", fontWeight: 600 }}>
-                    ₹{it.total_amount?.toFixed(2)}
+                  <td style={{ textAlign: "right", fontWeight: 700, fontSize: "0.9rem", color: "#f8fafc" }}>
+                    ₹{Number(it.total_amount || (it.rate * it.quantity)).toFixed(2)}
                   </td>
                   <td style={{ textAlign: "center" }}>
                     <button
@@ -149,11 +199,14 @@ export default function LiveBillCard({
                         border: "none",
                         color: "var(--text-dim)",
                         cursor: "pointer",
-                        padding: 4
+                        padding: 4,
+                        transition: "color 0.2s"
                       }}
                       title="Remove item"
+                      onMouseEnter={(e) => e.currentTarget.style.color = "var(--danger)"}
+                      onMouseLeave={(e) => e.currentTarget.style.color = "var(--text-dim)"}
                     >
-                      <Trash2 size={13} hover={{ color: "var(--danger)" }} />
+                      <Trash2 size={13} />
                     </button>
                   </td>
                 </tr>
@@ -165,26 +218,26 @@ export default function LiveBillCard({
 
       {/* Bill Calculation Summary */}
       <div style={{
-        background: "rgba(0, 0, 0, 0.25)",
+        background: "rgba(0, 0, 0, 0.3)",
         border: "1px solid var(--border-glass)",
         borderRadius: "var(--radius-md)",
         padding: "10px 14px",
-        marginBottom: 14,
+        marginBottom: 12,
         fontSize: "0.84rem"
       }}>
         <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
           <span style={{ color: "var(--text-muted)" }}>Subtotal:</span>
-          <span>₹{subtotal.toFixed(2)}</span>
+          <span style={{ fontWeight: 500 }}>₹{subtotal.toFixed(2)}</span>
         </div>
         {discount > 0 && (
           <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4, color: "var(--success)" }}>
-            <span>Discount:</span>
-            <span>- ₹{discount.toFixed(2)}</span>
+            <span>Discount Applied:</span>
+            <span style={{ fontWeight: 600 }}>- ₹{discount.toFixed(2)}</span>
           </div>
         )}
         {(cgst > 0 || sgst > 0) && (
           <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4, color: "var(--text-muted)" }}>
-            <span>Taxes (CGST + SGST):</span>
+            <span>GST (CGST + SGST):</span>
             <span>₹{(cgst + sgst).toFixed(2)}</span>
           </div>
         )}
@@ -197,36 +250,95 @@ export default function LiveBillCard({
         <div style={{
           display: "flex",
           justifyContent: "space-between",
+          alignItems: "center",
           borderTop: "1px solid var(--border-glass)",
           paddingTop: 8,
-          marginTop: 6,
-          fontWeight: 700,
-          fontSize: "1.1rem"
+          marginTop: 6
         }}>
-          <span>Grand Total:</span>
-          <span style={{ color: "var(--accent)" }}>₹{grandTotal.toFixed(2)}</span>
+          <span style={{ fontWeight: 700, fontSize: "1rem" }}>Grand Total:</span>
+          <span style={{ fontWeight: 800, fontSize: "1.25rem", color: "var(--accent)" }}>
+            ₹{grandTotal.toFixed(2)}
+          </span>
         </div>
       </div>
 
-      {/* Action Buttons */}
-      <div style={{ display: "flex", gap: 10 }}>
+      {/* Save Success / Error Alerts */}
+      {saveSuccess && (
+        <div style={{
+          background: "rgba(16, 185, 129, 0.2)",
+          border: "1px solid rgba(16, 185, 129, 0.5)",
+          color: "#6ee7b7",
+          padding: "6px 12px",
+          borderRadius: "var(--radius-sm)",
+          fontSize: "0.8rem",
+          display: "flex",
+          alignItems: "center",
+          gap: 6,
+          marginBottom: 10
+        }}>
+          <CheckCircle2 size={14} />
+          <span>Bill #{bill?.bill_id} successfully saved to MySQL database!</span>
+        </div>
+      )}
+
+      {saveError && (
+        <div style={{
+          background: "rgba(239, 68, 68, 0.2)",
+          border: "1px solid rgba(239, 68, 68, 0.5)",
+          color: "#fca5a5",
+          padding: "6px 12px",
+          borderRadius: "var(--radius-sm)",
+          fontSize: "0.8rem",
+          display: "flex",
+          alignItems: "center",
+          gap: 6,
+          marginBottom: 10
+        }}>
+          <AlertCircle size={14} />
+          <span>{saveError}</span>
+        </div>
+      )}
+
+      {/* Action Buttons Row */}
+      <div style={{ display: "flex", gap: 8 }}>
         <button
           onClick={onResetBill}
           disabled={items.length === 0}
           className="btn-secondary"
-          style={{ flex: 1, justifyContent: "center" }}
+          style={{ flex: 1, justifyContent: "center", padding: "8px 10px", fontSize: "0.84rem" }}
+          title="Reset current receipt"
         >
           Clear
         </button>
+
+        <button
+          onClick={handleDirectSave}
+          disabled={items.length === 0 || isSaving}
+          className="btn-secondary"
+          style={{
+            flex: 1.3,
+            justifyContent: "center",
+            padding: "8px 10px",
+            fontSize: "0.84rem",
+            background: "rgba(16, 185, 129, 0.15)",
+            border: "1px solid rgba(16, 185, 129, 0.4)",
+            color: "#6ee7b7"
+          }}
+          title="Save bill directly to cloud database"
+        >
+          <Save size={14} />
+          <span>{isSaving ? "Saving..." : "Save Bill"}</span>
+        </button>
+
         <button
           onClick={onFinalizeBill}
           disabled={items.length === 0}
           className="btn-primary"
-          style={{ flex: 2, justifyContent: "center" }}
+          style={{ flex: 2, justifyContent: "center", padding: "8px 12px", fontSize: "0.84rem" }}
         >
-          <FileText size={16} />
-          <span>Finalize Bill</span>
-          <ArrowRight size={14} />
+          <FileText size={15} />
+          <span>Invoice & Pay</span>
+          <ArrowRight size={13} />
         </button>
       </div>
     </div>

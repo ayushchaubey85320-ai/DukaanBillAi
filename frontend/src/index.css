@@ -171,6 +171,32 @@ body {
   }
 }
 
+/* Live Audio Equalizer Wave Animation */
+.audio-wave-bars {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  height: 18px;
+}
+
+.audio-wave-bars .wave-bar {
+  width: 3.5px;
+  background: #f87171;
+  border-radius: var(--radius-full);
+  display: inline-block;
+  animation: soundWave 0.8s ease-in-out infinite alternate;
+}
+
+.audio-wave-bars .wave-bar:nth-child(1) { height: 6px; animation-delay: 0.1s; }
+.audio-wave-bars .wave-bar:nth-child(2) { height: 18px; animation-delay: 0.3s; }
+.audio-wave-bars .wave-bar:nth-child(3) { height: 11px; animation-delay: 0.2s; }
+.audio-wave-bars .wave-bar:nth-child(4) { height: 15px; animation-delay: 0.4s; }
+
+@keyframes soundWave {
+  0% { transform: scaleY(0.35); opacity: 0.7; }
+  100% { transform: scaleY(1.15); opacity: 1; }
+}
+
 /* Chat Container & Bubbles */
 .chat-container {
   display: flex;

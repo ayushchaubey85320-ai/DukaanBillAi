@@ -6,38 +6,48 @@
 export const RENDER_CLOUD_URL = "https://dukaanbillai.onrender.com";
 export const RENDER_API_BASE = "https://dukaanbillai.onrender.com/api";
 
-// Auto-resolving API Base: Render Cloud (Mobile App & Hosted) or localhost:8001 (Local Dev only)
+export const DEFAULT_ONLINE_URL = "https://dukaanbillai.onrender.com";
+export const DEFAULT_LAN_URL = "http://192.168.1.100:8001";
+export const DEFAULT_LOCAL_URL = "http://127.0.0.1:8001";
+
+// Auto-resolving API Base: Local Dev (any port) -> localhost:8001; Render Cloud / Hosted -> same origin or RENDER_API_BASE
 export function getApiBase() {
-  // Purge any old stale tunnel/LAN URLs from localStorage so devices always connect to Render
   if (typeof window !== "undefined" && window.localStorage) {
     const custom = localStorage.getItem("dukaan_backend_url");
-    if (custom && (custom.includes("loca.lt") || custom.includes("192.168.") || !custom.includes("onrender.com"))) {
-      localStorage.removeItem("dukaan_backend_url");
+    if (custom && custom.trim()) {
+      const trimmed = custom.trim().replace(/\/+$/, "");
+      return trimmed.endsWith("/api") ? trimmed : `${trimmed}/api`;
     }
   }
 
   // 1. Web browser environment:
   if (typeof window !== "undefined" && window.location) {
     const host = window.location.hostname;
+    const protocol = window.location.protocol;
     const port = window.location.port;
 
-    // Local dev server only (Vite running on localhost:5174) -> local Python backend on 8001
-    if ((host === "localhost" || host === "127.0.0.1") && port === "5174") {
-      return "http://127.0.0.1:8001/api";
+    // Running on FastAPI port directly (e.g. 8001 or 10000)
+    if (port === "8001" || port === "10000") {
+      return `${protocol}//${host}:${port}/api`;
     }
 
-    // Hosted on Render or any public web domain -> use same origin
-    if (host && host !== "localhost" && host !== "127.0.0.1" && window.location.protocol.startsWith("http")) {
+    // Localhost or local network dev server (Vite on 5173, 5174, 3000, etc.)
+    if (host === "localhost" || host === "127.0.0.1" || host.startsWith("192.168.") || host.startsWith("10.")) {
+      return `http://127.0.0.1:8001/api`;
+    }
+
+    // Hosted on Render or custom public web domain -> use same origin
+    if (host && protocol.startsWith("http")) {
       return `${window.location.origin}/api`;
     }
   }
 
-  // 2. Native Mobile APK (Capacitor Android) -> Always connect directly to Render!
+  // 2. Native Mobile APK (Capacitor Android) -> Render Cloud API Base
   return RENDER_API_BASE;
 }
 
 export function setApiBase(url) {
-  if (!url || !url.includes("onrender.com")) {
+  if (!url || !url.trim()) {
     localStorage.removeItem("dukaan_backend_url");
   } else {
     localStorage.setItem("dukaan_backend_url", url.trim().replace(/\/+$/, ""));
