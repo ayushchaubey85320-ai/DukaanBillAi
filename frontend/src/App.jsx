@@ -10,6 +10,7 @@ import BillHistory from "./components/BillHistory";
 import AuthModal from "./components/AuthModal";
 import SuperAdminPortal from "./components/SuperAdminPortal";
 import ServerSettingsModal from "./components/ServerSettingsModal";
+import LoginScreen from "./components/LoginScreen";
 import { 
   sendChatMessage, getCurrentBill, getShopProfile,
   getCurrentUser, logoutUser, isImpersonating, exitImpersonation
@@ -22,6 +23,7 @@ export default function App() {
   const [mobileTab, setMobileTab] = useState("chat"); // "chat" or "receipt"
   const [isOfflineMode, setIsOfflineMode] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
+  const [isAuthChecking, setIsAuthChecking] = useState(true);
   const [impersonating, setImpersonating] = useState(() => isImpersonating());
   const [authInitialTab, setAuthInitialTab] = useState("login");
 
@@ -55,9 +57,15 @@ export default function App() {
         if (user) {
           setCurrentUser(user);
           setImpersonating(isImpersonating());
+          if (user.role === "super_admin") {
+            setActiveModal("admin");
+          }
         }
       })
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => {
+        setIsAuthChecking(false);
+      });
 
     getShopProfile()
       .then(res => {
@@ -78,6 +86,7 @@ export default function App() {
     if (user.role === "super_admin") {
       setActiveModal("admin");
     } else {
+      setActiveModal(null);
       getShopProfile().then(res => res && setShopInfo(res)).catch(() => {});
       getCurrentBill(sessionId).then(res => res && setBill(res)).catch(() => {});
     }
@@ -87,7 +96,7 @@ export default function App() {
     logoutUser();
     setCurrentUser(null);
     setImpersonating(false);
-    getShopProfile().then(res => res && setShopInfo(res)).catch(() => {});
+    setActiveModal(null);
   };
 
   const handleExitImpersonation = () => {
@@ -100,10 +109,7 @@ export default function App() {
 
   const handleOpenAdmin = () => {
     if (currentUser?.role === "super_admin") {
-      setActiveModal("admin");
-    } else {
-      setAuthInitialTab("admin");
-      setActiveModal("auth");
+      setActiveModal(activeModal === "admin" ? null : "admin");
     }
   };
 
@@ -198,6 +204,29 @@ export default function App() {
   const handleFinalizeBill = () => {
     handleSendMessage("Print invoice");
   };
+
+  if (isAuthChecking) {
+    return (
+      <div style={{
+        minHeight: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        background: "#0f172a",
+        color: "#10b981",
+        fontSize: "1.15rem",
+        fontWeight: 700,
+        letterSpacing: "0.05em"
+      }}>
+        DukaanAI...
+      </div>
+    );
+  }
+
+  // If user is not logged in, display the Login / Register screen first!
+  if (!currentUser) {
+    return <LoginScreen onAuthSuccess={handleAuthSuccess} />;
+  }
 
   return (
     <div className="app-wrapper">

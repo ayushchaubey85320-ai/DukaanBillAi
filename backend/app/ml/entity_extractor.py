@@ -44,7 +44,7 @@ def extract_shop_name(text: str) -> Optional[str]:
     return None
 
 def extract_customer_info(text: str) -> Dict[str, Optional[str]]:
-    """Extracts customer name and 10-digit Indian mobile number."""
+    """Extracts customer name and 10-digit Indian mobile number with high precision."""
     phone = None
     # 10 digit Indian phone starting with 6, 7, 8, or 9
     phone_match = re.search(r'(?:\+91[\-\s]?)?([6-9][0-9]{9})\b', text)
@@ -52,35 +52,55 @@ def extract_customer_info(text: str) -> Dict[str, Optional[str]]:
         phone = phone_match.group(1)
 
     name = None
-    
-    # 1. Check correction pattern first: "ramesh nhi ayush", "ramesh nahi ayush chaubey", "not ramesh ayush"
+    clean = text.strip()
+    if phone:
+        clean = clean.replace(phone, " ").replace("+91", " ")
+
+    # Stop words / command verbs in Hindi/Hinglish to filter out from customer names
+    action_stops = {
+        'ka', 'ki', 'ke', 'hai', 'is', 'ko', 'bhi', 'customer', 'grahak', 'client',
+        'naam', 'name', 'phone', 'mobile', 'number', 'change', 'kro', 'karo', 'krdo',
+        'kardo', 'badlo', 'badal', 'rakho', 'rakh', 'dalo', 'daal', 'likho', 'likh',
+        'hatao', 'set', 'update', 'kar', 'do', 'ji', 'shri', 'bhai', 'bhaiya', 'sir'
+    }
+
+    # 1. Pattern: "customer ramesh nahi ayush", "ramesh mat likho ayush likho"
     corr_m = re.search(
         r'(?:[A-Za-z\u0900-\u097F]+)\s+(?:nhi|nahi|not|mat)\s*(?:hai|likho|rakho)?\s+([A-Za-z\s\u0900-\u097F]+?)(?:$|\.|\,)', 
-        text, 
+        clean, 
         re.IGNORECASE
     )
     if corr_m:
         cand = corr_m.group(1).strip()
-        tokens = [t for t in cand.split() if t.lower() not in ['hai', 'is', 'ko', 'bhi', 'rakho', 'likho']]
+        tokens = [t for t in cand.split() if t.lower() not in action_stops]
         if tokens:
             name = " ".join(tokens).title()
             return {"customer_name": name, "phone": phone}
 
-    # 2. Check for name patterns:
-    # "Customer ka naam ayush chaubey hai", "Customer Ramesh 9876543210", "Grahak Sunita"
+    # 2. Pattern: "customer change kro ayush kro", "customer badlo ayush rakho", "customer badal kar ayush kar do"
+    change_m = re.search(
+        r'(?:customer|grahak|client|naam|name)?\s*(?:change\s*kro|change\s*karo|badlo|badal\s*do|badal\s*kar|badal\s*ke|hatao|replace)\s*(?:kar\s*)?(?:kro\s*)?([A-Za-z\s\u0900-\u097F]+)',
+        clean,
+        re.IGNORECASE
+    )
+    if change_m:
+        cand = change_m.group(1).strip()
+        tokens = [t for t in cand.split() if t.lower() not in action_stops]
+        if tokens:
+            name = " ".join(tokens).title()
+            return {"customer_name": name, "phone": phone}
+
+    # 3. Standard patterns: "Customer ka naam ayush", "Customer Ramesh", "Grahak Sunita"
     patterns = [
         r'(?:customer|grahak|client)(?:\s+(?:ka|ki))?\s*(?:naam|name)?\s*(?:hai|is)?\s*([A-Za-z\s\u0900-\u097F]+?)(?:\s+(?:hai|is|[0-9]{10})|$|\.|\,)',
-        r'(?:naam|name)\s+(?:is|hai)\s+([A-Za-z\s\u0900-\u097F]+?)(?:$|\.|\,)',
+        r'(?:naam|name)\s+(?:is|hai|=|:)?\s*([A-Za-z\s\u0900-\u097F]+?)(?:$|\.|\,)',
         r'(?:customer|grahak)\s+([A-Za-z\s\u0900-\u097F]+)'
     ]
     for p in patterns:
-        m = re.search(p, text, re.IGNORECASE)
+        m = re.search(p, clean, re.IGNORECASE)
         if m:
             cand = m.group(1).strip()
-            tokens = [
-                t for t in cand.split() 
-                if t.lower() not in ['ka', 'ki', 'ke', 'hai', 'is', 'ko', 'bhi', 'customer', 'grahak', 'naam', 'name', 'phone', 'mobile', 'number']
-            ]
+            tokens = [t for t in cand.split() if t.lower() not in action_stops]
             if tokens:
                 name = " ".join(tokens).title()
                 break

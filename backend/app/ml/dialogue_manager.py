@@ -232,12 +232,37 @@ def apply_gemini_turn(
             desc = "5%"
         bill = session.get_bill_summary()
         if session.language == "hi":
-            reply = f"{desc} डिस्काउंट लागू कर दिया गया। अंतिम कुल: ₹{bill['grand_total']:.2f}।"
+            reply = f"बिल्कुल भैया, {desc} डिस्काउंट लागू कर दिया गया। अंतिम कुल: ₹{bill['grand_total']:.2f}।"
         else:
-            reply = f"Applied {desc} discount. Final Total: ₹{bill['grand_total']:.2f}."
+            reply = f"Haanji bhaiya, applied {desc} discount! Final Total: ₹{bill['grand_total']:.2f}."
         return build_turn_response(session, intent, confidence, reply, reply, timeout_warning)
 
-    # 7. Customer Info
+    # 7. Remove GST (e.g. "gst htao", "gst 0%")
+    if intent in ["remove_gst", "zero_gst"]:
+        session.gst_override = 0.0
+        for itm in session.items:
+            itm["gst_rate"] = 0.0
+        bill = session.get_bill_summary()
+        if session.language == "hi":
+            reply = f"हाँजी भैया, GST हटा दिया गया (0% टैक्स)। कुल बिल: ₹{bill['grand_total']:.2f}।"
+        else:
+            reply = f"Bilkul bhaiya, removed GST (0% tax applied). Total bill: ₹{bill['grand_total']:.2f}."
+        return build_turn_response(session, intent, confidence, reply, reply, timeout_warning)
+
+    # 8. Set / Add GST
+    if intent in ["set_gst", "add_gst"]:
+        rate = float(gemini_data.get("gst_rate") or 18.0)
+        session.gst_override = rate
+        for itm in session.items:
+            itm["gst_rate"] = rate
+        bill = session.get_bill_summary()
+        if session.language == "hi":
+            reply = f"जी भैया, {rate}% GST जोड़ दिया गया। कुल बिल: ₹{bill['grand_total']:.2f} (CGST: ₹{bill['total_cgst']:.2f}, SGST: ₹{bill['total_sgst']:.2f})।"
+        else:
+            reply = f"Ji bhaiya, applied {rate}% GST. Grand Total: ₹{bill['grand_total']:.2f} (CGST: ₹{bill['total_cgst']:.2f}, SGST: ₹{bill['total_sgst']:.2f})."
+        return build_turn_response(session, intent, confidence, reply, reply, timeout_warning)
+
+    # 9. Customer Info
     if intent == "set_customer" or gemini_data.get("customer_name") or gemini_data.get("customer_phone"):
         c_name = gemini_data.get("customer_name")
         c_phone = gemini_data.get("customer_phone")
@@ -248,9 +273,9 @@ def apply_gemini_turn(
         disp_name = session.customer_name or "Customer"
         disp_phone = mask_phone_number(session.customer_phone)
         if session.language == "hi":
-            reply = f"ग्राहक विवरण सेव किया: {disp_name} {f'({disp_phone})' if disp_phone else ''}।"
+            reply = f"हाँजी भैया, ग्राहक का नाम '{disp_name}' {f'({disp_phone})' if disp_phone else ''} दर्ज कर दिया गया है!"
         else:
-            reply = f"Recorded customer: {disp_name} {f'({disp_phone})' if disp_phone else ''}."
+            reply = f"Ji bhaiya, customer recorded: {disp_name} {f'({disp_phone})' if disp_phone else ''}!"
         return build_turn_response(session, "set_customer", confidence, reply, reply, timeout_warning)
 
     # 8. Show Bill
@@ -411,9 +436,9 @@ def process_dialogue_turn(session_id: str, text: str) -> Dict[str, Any]:
             
             bill = session.get_bill_summary()
             if session.language == "hi":
-                reply = f"जोड़ दिया: {', '.join(added_names)}। कुल बिल: ₹{bill['grand_total']:.2f}। और कुछ?"
+                reply = f"जी भैया, जोड़ दिया: {', '.join(added_names)}। कुल बिल: ₹{bill['grand_total']:.2f}। और कुछ सामान जोड़ना है?"
             else:
-                reply = f"Added {len(bulk_list)} items: {', '.join(added_names)}. Running Total: ₹{bill['grand_total']:.2f}. Anything else?"
+                reply = f"Bilkul bhaiya! Added {len(bulk_list)} items: {', '.join(added_names)}. Running Total: ₹{bill['grand_total']:.2f}. Anything else?"
             return build_turn_response(session, intent, confidence, reply, reply)
         else:
             item_data = extract_single_item(text)
@@ -461,9 +486,9 @@ def process_dialogue_turn(session_id: str, text: str) -> Dict[str, Any]:
 
                 bill = session.get_bill_summary()
                 if session.language == "hi":
-                    reply = f"जोड़ दिया: {item_data['name']} ({qty_desc} @ ₹{item_data['rate']})। कुल: ₹{bill['grand_total']:.2f}।"
+                    reply = f"जी भैया, जोड़ दिया: {item_data['name']} ({qty_desc} @ ₹{item_data['rate']})। कुल बिल हुआ ₹{bill['grand_total']:.2f}। और कुछ?"
                 else:
-                    reply = f"Added: {item_data['name']} ({qty_desc} @ ₹{item_data['rate']:.2f}). Total: ₹{bill['grand_total']:.2f}."
+                    reply = f"Bilkul bhaiya! Added: {item_data['name']} ({qty_desc} @ ₹{item_data['rate']:.2f}). Running Total: ₹{bill['grand_total']:.2f}. Anything else?"
                 return build_turn_response(session, intent, confidence, reply, reply, timeout_warning)
 
     # Change Quantity
@@ -621,9 +646,9 @@ def process_dialogue_turn(session_id: str, text: str) -> Dict[str, Any]:
 
         bill = session.get_bill_summary()
         if session.language == "hi":
-            reply = f"{desc} डिस्काउंट लागू कर दिया गया। अंतिम कुल: ₹{bill['grand_total']:.2f}।"
+            reply = f"बिल्कुल भैया, {desc} डिस्काउंट लगा दिया! अब फाइनल कुल बिल: ₹{bill['grand_total']:.2f} बना।"
         else:
-            reply = f"Applied {desc} discount. Final Total: ₹{bill['grand_total']:.2f}."
+            reply = f"Haanji bhaiya, applied {desc} discount! Final Total: ₹{bill['grand_total']:.2f}."
         return build_turn_response(session, intent, confidence, reply, reply)
 
     # Remove GST / 0% Tax (e.g. "gst htao", "sirf gehu se gst htao", "remove gst")
@@ -641,18 +666,18 @@ def process_dialogue_turn(session_id: str, text: str) -> Dict[str, Any]:
             target_item["gst_rate"] = 0.0
             bill = session.get_bill_summary()
             if session.language == "hi":
-                reply = f"{target_item['name']} से GST हटा दिया गया (0% टैक्स)। कुल बिल: ₹{bill['grand_total']:.2f}।"
+                reply = f"हाँजी भैया, {target_item['name']} से GST हटा दिया गया (0% टैक्स)। कुल बिल: ₹{bill['grand_total']:.2f}।"
             else:
-                reply = f"Removed GST from {target_item['name']} (0% tax applied). Grand Total: ₹{bill['grand_total']:.2f}."
+                reply = f"Bilkul bhaiya, removed GST from {target_item['name']} (0% tax applied). Grand Total: ₹{bill['grand_total']:.2f}."
         else:
             session.gst_override = 0.0
             for itm in session.items:
                 itm["gst_rate"] = 0.0
             bill = session.get_bill_summary()
             if session.language == "hi":
-                reply = f"GST हटा दिया गया (0% टैक्स)। कुल बिल: ₹{bill['grand_total']:.2f}।"
+                reply = f"हाँजी भैया, GST हटा दिया गया (0% टैक्स)। कुल बिल: ₹{bill['grand_total']:.2f}।"
             else:
-                reply = f"Removed GST (0% tax applied). Grand Total: ₹{bill['grand_total']:.2f}."
+                reply = f"Bilkul bhaiya, removed GST (0% tax applied). Grand Total: ₹{bill['grand_total']:.2f}."
         return build_turn_response(session, intent, confidence, reply, reply)
 
     # Add / Override GST
@@ -666,9 +691,9 @@ def process_dialogue_turn(session_id: str, text: str) -> Dict[str, Any]:
         bill = session.get_bill_summary()
         rate_str = f"{rate}%" if rate is not None else "GST"
         if session.language == "hi":
-            reply = f"{rate_str} टैक्स जोड़ दिया गया। कुल बिल: ₹{bill['grand_total']:.2f} (CGST: ₹{bill['total_cgst']:.2f}, SGST: ₹{bill['total_sgst']:.2f})।"
+            reply = f"जी भैया, {rate_str} टैक्स जोड़ दिया गया। कुल बिल: ₹{bill['grand_total']:.2f} (CGST: ₹{bill['total_cgst']:.2f}, SGST: ₹{bill['total_sgst']:.2f})।"
         else:
-            reply = f"Applied {rate_str}. Grand Total: ₹{bill['grand_total']:.2f} (CGST: ₹{bill['total_cgst']:.2f}, SGST: ₹{bill['total_sgst']:.2f})."
+            reply = f"Ji bhaiya, applied {rate_str} GST. Grand Total: ₹{bill['grand_total']:.2f} (CGST: ₹{bill['total_cgst']:.2f}, SGST: ₹{bill['total_sgst']:.2f})."
         return build_turn_response(session, intent, confidence, reply, reply)
 
     # Set Customer
@@ -682,21 +707,21 @@ def process_dialogue_turn(session_id: str, text: str) -> Dict[str, Any]:
         c_name = session.customer_name or "Customer"
         c_phone = mask_phone_number(session.customer_phone)
         if session.language == "hi":
-            reply = f"ग्राहक विवरण सेव किया: {c_name} {f'({c_phone})' if c_phone else ''}।"
+            reply = f"हाँजी भैया, ग्राहक का नाम '{c_name}' {f'({c_phone})' if c_phone else ''} बिल पर दर्ज कर दिया गया है!"
         else:
-            reply = f"Customer recorded: {c_name} {f'({c_phone})' if c_phone else ''}."
+            reply = f"Ji bhaiya, customer recorded: {c_name} {f'({c_phone})' if c_phone else ''}!"
         return build_turn_response(session, intent, confidence, reply, reply)
 
     # Show Bill
     if intent == "show_bill":
         bill = session.get_bill_summary()
         if not session.items:
-            reply = "बिल खाली है। कोई सामान जोड़ें!" if session.language == "hi" else "Bill is empty. Add some items to begin!"
+            reply = "भैया, बिल अभी खाली है। कोई सामान बोलें!" if session.language == "hi" else "Bill is empty, bhaiya. Speak or type items to begin!"
         else:
             lines = [f"{it['name']} ({it['quantity']}{it['unit']}) = ₹{it['total_amount']:.2f}" for it in bill['items']]
             items_str = ", ".join(lines)
             if session.language == "hi":
-                reply = f"बिल सारांश ({bill['items_count']} आइटम): {items_str}। टैक्स: ₹{bill['total_tax']:.2f}। कुल देय: ₹{bill['grand_total']:.2f}।"
+                reply = f"बिल सारांश ({bill['items_count']} आइटम): {items_str}। टैक्स: ₹{bill['total_tax']:.2f}। कुल देय राशि: ₹{bill['grand_total']:.2f}।"
             else:
                 reply = f"Bill ({bill['items_count']} items): {items_str}. Tax: ₹{bill['total_tax']:.2f}. Grand Total: ₹{bill['grand_total']:.2f}."
         return build_turn_response(session, intent, confidence, reply, reply)
@@ -705,14 +730,14 @@ def process_dialogue_turn(session_id: str, text: str) -> Dict[str, Any]:
     if intent in ["finalize_bill", "print_thermal", "download_pdf"]:
         bill = session.get_bill_summary()
         if not session.items:
-            reply = "बिल में कोई आइटम नहीं है। कृपया पहले आइटम जोड़ें।" if session.language == "hi" else "Cannot finalize an empty bill. Please add items first."
+            reply = "भैया, बिल में कोई आइटम नहीं है। पहले सामान जोड़ लीजिए।" if session.language == "hi" else "Cannot finalize an empty bill, bhaiya. Please add items first."
             return build_turn_response(session, intent, confidence, reply, reply)
         
         session.state = "FINALIZED"
         if session.language == "hi":
-            reply = f"बिल #{bill['bill_id']} तैयार है! कुल राशि: ₹{bill['grand_total']:.2f}। आप PDF डाउनलोड कर सकते हैं या थर्मल प्रिंट ले सकते हैं।"
+            reply = f"शानदार भैया! बिल #{bill['bill_id']} फाइनल हो गया है। कुल रकम: ₹{bill['grand_total']:.2f}। रसीद प्रिंट करें या PDF डाउनलोड करें?"
         else:
-            reply = f"Invoice #{bill['bill_id']} finalized! Total Amount: ₹{bill['grand_total']:.2f}. Ready to print or download PDF."
+            reply = f"Shandar bhaiya! Invoice #{bill['bill_id']} finalized! Total Amount: ₹{bill['grand_total']:.2f}. Ready to print or share PDF."
         return build_turn_response(session, intent, confidence, reply, reply)
 
     # Reset / New Bill
@@ -720,26 +745,26 @@ def process_dialogue_turn(session_id: str, text: str) -> Dict[str, Any]:
         session.reset_bill()
         bill = session.get_bill_summary()
         if session.language == "hi":
-            reply = f"नया बिल शुरू! बिल #{bill['bill_id']} तैयार है। सामान बोलें।"
+            reply = f"नमस्ते भैया! नया बिल #{bill['bill_id']} शुरू हो गया है। बताइए, ग्राहक क्या सामान ले रहे हैं?"
         else:
-            reply = f"New bill started! Invoice #{bill['bill_id']} is ready. What items would you like to add?"
+            reply = f"Ji bhaiya! New bill #{bill['bill_id']} started. What items would you like to add?"
         return build_turn_response(session, intent, confidence, reply, reply)
 
     # Help
     if intent == "help":
         if session.language == "hi":
-            reply = "आप बोल सकते हैं: '2 किलो चावल 60 रुपये', '10% डिस्काउंट', 'GST 18% लगाओ', 'चामल हटाओ', 'बिल दिखाओ', या 'बिल बना दो'।"
+            reply = "भैया, आप बोल सकते हैं: '2 किलो चावल 60 रुपये', '10% डिस्काउंट', 'GST 18% लगाओ', 'चामल हटाओ', 'बिल दिखाओ', या 'बिल बना दो'।"
         else:
-            reply = "You can say: 'Add 2 kg rice at 60 rupees', 'Give 10% discount', 'Add 18% GST', 'Remove rice', 'Show bill', or 'Print invoice'."
+            reply = "Bhaiya, you can say: 'Add 2 kg rice at 60 rupees', 'Give 10% discount', 'Add 18% GST', 'Remove rice', 'Show bill', or 'Print invoice'."
         return build_turn_response(session, intent, confidence, reply, reply)
 
     # Greet
     if intent == "greet":
-        shop_n = session.shop_info.get("name", "Shop")
+        shop_n = session.shop_info.get("name", "Apni Dukaan")
         if session.language == "hi":
-            reply = f"नमस्ते! {shop_n} बिलिंग असिस्टेंट में आपका स्वागत है। मैं आपकी क्या मदद करूँ?"
+            reply = f"नमस्ते भैया! {shop_n} के डिजिटल बिलिंग मुनीम में आपका स्वागत है। बोलकर या लिखकर बिल बनाइए (उदा: '2 किलो चावल 60 रुपये')!"
         else:
-            reply = f"Hello! Welcome to {shop_n} Billing Assistant. How can I assist you with your billing today?"
+            reply = f"Namaste bhaiya! Welcome to {shop_n} Billing Munimji. Just speak or type items to generate your bill (e.g. 'Add 2 kg rice at 60 rs' or '2 packet biscuit 20 each')."
         return build_turn_response(session, intent, confidence, reply, reply)
 
     # Default / Fallback

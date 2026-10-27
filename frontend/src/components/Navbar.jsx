@@ -89,8 +89,8 @@ export default function Navbar({
           <span>{dbConnected ? "MySQL Cloud" : "Offline Cache"}</span>
         </button>
 
-        {/* Super Admin Access Button */}
-        {currentUser?.role === "super_admin" ? (
+        {/* Super Admin Access Button - ONLY shown to logged-in Super Admin (Ayush) */}
+        {currentUser?.role === "super_admin" && (
           <button
             onClick={onOpenAdmin}
             style={{
@@ -110,23 +110,7 @@ export default function Navbar({
             title="Open Super Admin Master Portal"
           >
             <Shield size={15} />
-            <span>Super Admin</span>
-          </button>
-        ) : (
-          <button
-            onClick={onOpenAdmin}
-            className="btn-secondary"
-            style={{
-              padding: "5px 10px",
-              fontSize: "0.78rem",
-              background: "rgba(245, 158, 11, 0.12)",
-              borderColor: "rgba(245, 158, 11, 0.35)",
-              color: "#fbbf24"
-            }}
-            title="Super Admin Portal Login"
-          >
-            <Shield size={13} />
-            <span>Admin</span>
+            <span>Master Portal</span>
           </button>
         )}
 

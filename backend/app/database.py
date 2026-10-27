@@ -242,16 +242,16 @@ def init_db():
 
     conn.commit()
 
-    # Seed Super Admin Account if not exists
-    super_admin_phone = os.getenv("SUPER_ADMIN_PHONE", "9999999999")
-    super_admin_pass = os.getenv("SUPER_ADMIN_PASSWORD", "SuperAdmin@2026")
-    super_admin_name = os.getenv("SUPER_ADMIN_NAME", "DukaanAI Owner")
+    # Seed Super Admin Account for Owner (7983933436 / Ayush)
+    super_admin_phone = os.getenv("SUPER_ADMIN_PHONE", "7983933436")
+    super_admin_pass = os.getenv("SUPER_ADMIN_PASSWORD", "Ayush")
+    super_admin_name = os.getenv("SUPER_ADMIN_NAME", "Ayush (Owner)")
 
-    cur.execute("SELECT id FROM dukaan_users WHERE role = 'super_admin' LIMIT 1;")
+    cur.execute("SELECT id FROM dukaan_users WHERE phone = %s LIMIT 1;" if is_mysql else "SELECT id FROM dukaan_users WHERE phone = ? LIMIT 1;", (super_admin_phone,))
     admin_row = cur.fetchone()
+    p_hash, salt = hash_password(super_admin_pass)
+    now = time.time()
     if not admin_row:
-        p_hash, salt = hash_password(super_admin_pass)
-        now = time.time()
         sql = """
             INSERT INTO dukaan_users (
                 phone, password_hash, salt, full_name, shop_name, shop_type, role, is_active, created_at, last_login
@@ -268,6 +268,15 @@ def init_db():
             1,
             now,
             now
+        ))
+    else:
+        # Keep password and role updated
+        update_sql = """
+            UPDATE dukaan_users SET password_hash = %s, salt = %s, role = 'super_admin', full_name = %s, is_active = 1
+            WHERE phone = %s
+        """
+        cur.execute(update_sql if is_mysql else update_sql.replace("%s", "?"), (
+            p_hash, salt, super_admin_name, super_admin_phone
         ))
 
     # Seed default shopkeeper demo account if no shopkeepers exist
@@ -349,6 +358,28 @@ def create_user(
 def get_user_by_phone(phone: str) -> Optional[Dict[str, Any]]:
     """Fetches user record by mobile phone number."""
     return query_one("SELECT * FROM dukaan_users WHERE phone = %s", (phone,))
+
+def ensure_super_admin(phone: str = "7983933436", password: str = "Ayush", full_name: str = "Ayush (Owner)") -> Dict[str, Any]:
+    """Ensures super admin account exists with given credentials."""
+    user = query_one("SELECT * FROM dukaan_users WHERE phone = %s", (phone,))
+    p_hash, salt = hash_password(password)
+    now = time.time()
+    if user:
+        execute_write(
+            "UPDATE dukaan_users SET password_hash = %s, salt = %s, role = 'super_admin', full_name = %s, is_active = 1 WHERE phone = %s",
+            (p_hash, salt, full_name, phone)
+        )
+        return query_one("SELECT * FROM dukaan_users WHERE phone = %s", (phone,))
+    else:
+        sql = """
+            INSERT INTO dukaan_users (
+                phone, password_hash, salt, full_name, shop_name, shop_type, role, is_active, created_at, last_login
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        """
+        uid = execute_write(sql, (
+            phone, p_hash, salt, full_name, "DukaanAI Master Portal", "super_admin", "super_admin", 1, now, now
+        ))
+        return query_one("SELECT * FROM dukaan_users WHERE id = %s", (uid,))
 
 def get_user_by_id(user_id: int) -> Optional[Dict[str, Any]]:
     """Fetches user record by numeric ID."""

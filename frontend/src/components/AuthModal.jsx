@@ -182,7 +182,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, initialTab =
         {/* Tab Switcher */}
         <div style={{
           display: "grid",
-          gridTemplateColumns: "1fr 1fr 1fr",
+          gridTemplateColumns: "1fr 1fr",
           gap: 6,
           background: "rgba(0, 0, 0, 0.35)",
           padding: 4,
@@ -222,23 +222,6 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, initialTab =
           >
             <UserPlus size={13} style={{ display: "inline", marginRight: 4, verticalAlign: -2 }} />
             Register
-          </button>
-          <button
-            onClick={() => { setActiveTab("admin"); setErrorMessage(""); }}
-            style={{
-              padding: "8px 6px",
-              borderRadius: 8,
-              border: "none",
-              fontSize: "0.8rem",
-              fontWeight: 600,
-              cursor: "pointer",
-              background: activeTab === "admin" ? "rgba(245, 158, 11, 0.25)" : "transparent",
-              color: activeTab === "admin" ? "#fbbf24" : "#94a3b8",
-              transition: "all 0.2s"
-            }}
-          >
-            <Shield size={13} style={{ display: "inline", marginRight: 4, verticalAlign: -2 }} />
-            Super Admin
           </button>
         </div>
 
