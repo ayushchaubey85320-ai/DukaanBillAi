@@ -141,7 +141,7 @@ export default function LiveBillCard({
                   <td>
                     <div style={{ fontWeight: 600, color: "#f8fafc" }}>{it.name}</div>
                     <div style={{ fontSize: "0.68rem", color: "var(--text-dim)" }}>
-                      HSN: {it.hsn || "9999"} • GST: {it.gst_rate || 5}%
+                      HSN: {it.hsn || "9999"} • GST: {it.gst_rate !== undefined && it.gst_rate !== null ? it.gst_rate : 0}%
                     </div>
                   </td>
                   <td>
@@ -235,12 +235,10 @@ export default function LiveBillCard({
             <span style={{ fontWeight: 600 }}>- ₹{discount.toFixed(2)}</span>
           </div>
         )}
-        {(cgst > 0 || sgst > 0) && (
-          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4, color: "var(--text-muted)" }}>
-            <span>GST (CGST + SGST):</span>
-            <span>₹{(cgst + sgst).toFixed(2)}</span>
-          </div>
-        )}
+        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4, color: (cgst + sgst) > 0 ? "var(--text-muted)" : "#34d399" }}>
+          <span>GST Tax:</span>
+          <span>{(cgst + sgst) > 0 ? `₹${(cgst + sgst).toFixed(2)}` : "₹0.00 (0% Tax)"}</span>
+        </div>
         {roundOff !== 0 && (
           <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4, color: "var(--text-dim)" }}>
             <span>Round off:</span>

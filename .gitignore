@@ -12,6 +12,7 @@ frontend/android/.gradle/
 *.apk
 *.aab
 !apk/DukaanAI.apk
+!frontend/dist/**
 
 # Private Super Admin App (Owner Only - Not Open Source)
 mobile_admin_app/

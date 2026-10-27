@@ -5,7 +5,19 @@ UPI QR generation, SQLite history, and automated test runners.
 """
 import io
 import os
+import sys
 import time
+
+# Auto-load .env file if available
+_proj_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+_env_f = os.path.join(_proj_root, ".env")
+if os.path.exists(_env_f):
+    with open(_env_f, "r", encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if line and not line.startswith("#") and "=" in line:
+                k, v = line.split("=", 1)
+                os.environ.setdefault(k.strip(), v.strip())
 from typing import Dict, Any, Optional
 from fastapi import FastAPI, HTTPException, Response
 from fastapi.responses import FileResponse

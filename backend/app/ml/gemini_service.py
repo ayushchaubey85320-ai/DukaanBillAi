@@ -70,6 +70,9 @@ Rules:
 3. Return raw JSON ONLY.
 """
 
+import time
+_circuit_breaker_until = 0.0
+
 def parse_with_gemini(
     text: str, 
     shop_info: Optional[Dict[str, Any]] = None,
@@ -78,8 +81,15 @@ def parse_with_gemini(
 ) -> Optional[Dict[str, Any]]:
     """
     Sends user utterance to Gemini API for high-accuracy intent and entity parsing.
-    Returns structured dict or None if API is unavailable.
+    Protected with a fast circuit-breaker to keep app latency near 0ms when quota is hit.
     """
+    global _circuit_breaker_until
+    now = time.time()
+    
+    # If quota limit (429) was encountered recently, bypass external call to keep app lightning-fast
+    if now < _circuit_breaker_until:
+        return None
+
     if not text or not text.strip():
         return None
 
@@ -107,30 +117,37 @@ def parse_with_gemini(
         }
     }
 
-    for model in GEMINI_MODELS:
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={GEMINI_API_KEY}"
-        try:
-            res = requests.post(url, json=payload, timeout=5)
-            if res.status_code == 200:
-                body = res.json()
-                candidates = body.get("candidates", [])
-                if candidates:
-                    parts = candidates[0].get("content", {}).get("parts", [])
-                    if parts:
-                        raw_json = parts[0].get("text", "").strip()
-                        # Strip any accidental ```json ... ``` wrappers
-                        raw_json = re.sub(r"^```(?:json)?\s*", "", raw_json, flags=re.IGNORECASE)
-                        raw_json = re.sub(r"\s*```$", "", raw_json)
-                        parsed = json.loads(raw_json.strip())
-                        if isinstance(parsed, dict) and "intent" in parsed:
-                            parsed["source"] = "gemini"
-                            parsed["model"] = model
-                            return parsed
-            elif res.status_code in [404, 503]:
-                # Try next candidate model
-                continue
-        except Exception as e:
-            # Network timeout or parsing error, try next or fallback
-            continue
+    # Use single fastest model with strict 1.8s timeout
+    primary_model = "gemini-2.5-flash"
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/{primary_model}:generateContent?key={GEMINI_API_KEY}"
+    
+    try:
+        res = requests.post(url, json=payload, timeout=1.8)
+        if res.status_code == 200:
+            body = res.json()
+            candidates = body.get("candidates", [])
+            if candidates:
+                parts = candidates[0].get("content", {}).get("parts", [])
+                if parts:
+                    raw_json = parts[0].get("text", "").strip()
+                    # Strip any accidental ```json ... ``` wrappers
+                    raw_json = re.sub(r"^```(?:json)?\s*", "", raw_json, flags=re.IGNORECASE)
+                    raw_json = re.sub(r"\s*```$", "", raw_json)
+                    parsed = json.loads(raw_json.strip())
+                    if isinstance(parsed, dict) and "intent" in parsed:
+                        parsed["source"] = "gemini"
+                        parsed["model"] = primary_model
+                        return parsed
+        elif res.status_code == 429:
+            # Free tier quota exceeded: Trip circuit breaker for 3 minutes so app remains instant
+            _circuit_breaker_until = now + 180.0
+            return None
+        elif res.status_code in [404, 503]:
+            _circuit_breaker_until = now + 60.0
+            return None
+    except Exception:
+        # Network timeout or DNS issue: Trip breaker briefly (30s) so shopkeeper experiences 0 lag
+        _circuit_breaker_until = now + 30.0
+        return None
 
     return None
